@@ -1,0 +1,235 @@
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  Binary, 
+  Cpu, 
+  GitBranch, 
+  Network, 
+  Briefcase, 
+  Server,
+  ArrowRight,
+  PlayCircle
+} from 'lucide-react';
+import { roadmapCategories, getTopicsByCategory } from '@/data/roadmaps';
+
+interface RoadmapsProps {
+  onTopicClick: (topicId: string) => void;
+}
+
+const iconMap: Record<string, React.ElementType> = {
+  Binary,
+  Cpu,
+  GitBranch,
+  Network,
+  Briefcase,
+  Server
+};
+
+export function Roadmaps({ onTopicClick }: RoadmapsProps) {
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: [0.16, 1, 0.3, 1] as const
+      }
+    }
+  };
+
+  return (
+    <section id="roadmaps" className="relative py-24 overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 grid-pattern opacity-20" />
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h2 className="font-display text-4xl sm:text-5xl text-white mb-4">
+            Learning <span className="gradient-text">Roadmaps</span>
+          </h2>
+          <p className="text-lg text-white/60 max-w-2xl mx-auto">
+            Choose your path and start your journey. Each roadmap is carefully curated 
+            to take you from beginner to expert.
+          </p>
+        </motion.div>
+
+        {/* Bento Grid */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {roadmapCategories.map((category) => {
+            const Icon = iconMap[category.icon] || Binary;
+            const topics = getTopicsByCategory(category.id);
+            const totalProblems = topics.reduce((sum, t) => sum + t.total_problems, 0);
+
+            return (
+              <motion.div
+                key={category.id}
+                variants={itemVariants}
+                onMouseEnter={() => setHoveredCategory(category.id)}
+                onMouseLeave={() => setHoveredCategory(null)}
+                className="group relative"
+              >
+                <div 
+                  className="relative h-full glass rounded-2xl p-6 overflow-hidden card-hover cursor-pointer"
+                  style={{
+                    transform: hoveredCategory === category.id 
+                      ? 'translateY(-4px) scale(1.02)' 
+                      : 'translateY(0) scale(1)',
+                    transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}
+                  onClick={() => {
+                    if (topics.length > 0) {
+                      onTopicClick(topics[0].id);
+                    }
+                  }}
+                >
+                  {/* Gradient Border Effect */}
+                  <div 
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: `linear-gradient(135deg, ${category.color}40, transparent)`,
+                      padding: '1px'
+                    }}
+                  />
+
+                  {/* Content */}
+                  <div className="relative z-10">
+                    {/* Icon & Title */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div 
+                        className="w-14 h-14 rounded-xl flex items-center justify-center"
+                        style={{ background: `${category.color}20` }}
+                      >
+                        <Icon 
+                          className="w-7 h-7" 
+                          style={{ color: category.color }}
+                        />
+                      </div>
+                      <div className="flex items-center gap-1 text-white/40">
+                        <span className="text-sm">{topics.length} topics</span>
+                      </div>
+                    </div>
+
+                    <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-[#a088ff] transition-colors">
+                      {category.title}
+                    </h3>
+                    <p className="text-white/60 text-sm mb-4 line-clamp-2">
+                      {category.description}
+                    </p>
+
+                    {/* Progress */}
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between text-sm mb-2">
+                        <span className="text-white/60">Progress</span>
+                        <span className="text-white/80">0/{totalProblems}</span>
+                      </div>
+                      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          whileInView={{ width: '0%' }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1, delay: 0.5 }}
+                          className="h-full rounded-full"
+                          style={{ background: category.color }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Topics Preview */}
+                    <div className="space-y-2">
+                      {topics.slice(0, 3).map((topic) => (
+                        <div 
+                          key={topic.id}
+                          className="flex items-center gap-2 text-sm text-white/60"
+                        >
+                          <PlayCircle className="w-4 h-4" style={{ color: category.color }} />
+                          <span className="truncate">{topic.title}</span>
+                        </div>
+                      ))}
+                      {topics.length > 3 && (
+                        <div className="text-sm text-white/40 pl-6">
+                          +{topics.length - 3} more topics
+                        </div>
+                      )}
+                    </div>
+
+                    {/* CTA */}
+                    <div className="mt-6 pt-4 border-t border-white/10">
+                      <button 
+                        className="flex items-center gap-2 text-sm font-medium group/btn"
+                        style={{ color: category.color }}
+                      >
+                        Start Learning
+                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Hover Glow */}
+                  <div 
+                    className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full blur-[60px] opacity-0 group-hover:opacity-50 transition-opacity duration-500"
+                    style={{ background: category.color }}
+                  />
+                </div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+
+        {/* Stats Row */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4"
+        >
+          {[
+            { label: 'Total Problems', value: '500+', color: '#a088ff' },
+            { label: 'Video Solutions', value: '300+', color: '#63e3ff' },
+            { label: 'Learning Paths', value: '12', color: '#ff8a63' },
+            { label: 'Active Learners', value: '10K+', color: '#88ff9f' }
+          ].map((stat) => (
+            <div 
+              key={stat.label}
+              className="glass rounded-xl p-4 text-center"
+            >
+              <p 
+                className="text-2xl sm:text-3xl font-bold mb-1"
+                style={{ color: stat.color }}
+              >
+                {stat.value}
+              </p>
+              <p className="text-sm text-white/60">{stat.label}</p>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}

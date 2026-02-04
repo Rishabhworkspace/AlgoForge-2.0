@@ -1,0 +1,349 @@
+import { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  Search, 
+  Play, 
+  ExternalLink, 
+  Bookmark, 
+  CheckCircle2, 
+  Circle,
+  FileText,
+  Tag,
+  TrendingUp,
+  Clock,
+  BarChart3,
+  ChevronDown
+} from 'lucide-react';
+import { problems as allProblems, topics } from '@/data/roadmaps';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+
+export function Problems() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [difficultyFilter, setDifficultyFilter] = useState<'all' | 'Easy' | 'Medium' | 'Hard'>('all');
+  const [tagFilter, setTagFilter] = useState<string>('all');
+  const [completedProblems, setCompletedProblems] = useState<Set<string>>(new Set());
+  const [bookmarkedProblems, setBookmarkedProblems] = useState<Set<string>>(new Set());
+
+  // Get all unique tags
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    allProblems.forEach(p => p.tags.forEach(t => tags.add(t)));
+    return Array.from(tags).sort();
+  }, []);
+
+  // Filter problems
+  const filteredProblems = useMemo(() => {
+    return allProblems.filter(problem => {
+      const matchesSearch = problem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           problem.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesDifficulty = difficultyFilter === 'all' || problem.difficulty === difficultyFilter;
+      const matchesTag = tagFilter === 'all' || problem.tags.includes(tagFilter);
+      return matchesSearch && matchesDifficulty && matchesTag;
+    });
+  }, [searchQuery, difficultyFilter, tagFilter]);
+
+  // Stats
+  const stats = {
+    total: allProblems.length,
+    easy: allProblems.filter(p => p.difficulty === 'Easy').length,
+    medium: allProblems.filter(p => p.difficulty === 'Medium').length,
+    hard: allProblems.filter(p => p.difficulty === 'Hard').length,
+  };
+
+  const toggleComplete = (problemId: string) => {
+    setCompletedProblems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(problemId)) {
+        newSet.delete(problemId);
+      } else {
+        newSet.add(problemId);
+        toast.success('Problem marked as complete! +25 XP');
+      }
+      return newSet;
+    });
+  };
+
+  const toggleBookmark = (problemId: string) => {
+    setBookmarkedProblems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(problemId)) {
+        newSet.delete(problemId);
+        toast.info('Bookmark removed');
+      } else {
+        newSet.add(problemId);
+        toast.success('Problem bookmarked');
+      }
+      return newSet;
+    });
+  };
+
+  return (
+    <section className="relative min-h-screen pt-24 pb-12 overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 grid-pattern opacity-20" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#a088ff]/10 rounded-full blur-[200px]" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-8"
+        >
+          <h1 className="font-display text-3xl sm:text-4xl text-white mb-2">
+            Problem <span className="gradient-text">Library</span>
+          </h1>
+          <p className="text-white/60">
+            Browse and practice from our collection of {stats.total}+ problems
+          </p>
+        </motion.div>
+
+        {/* Stats Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+        >
+          <div className="glass rounded-xl p-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-white/60" />
+              </div>
+              <span className="text-white/60 text-sm">Total</span>
+            </div>
+            <p className="text-2xl font-bold text-white">{stats.total}</p>
+          </div>
+
+          <div className="glass rounded-xl p-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-[#7ca700]/20 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-[#7ca700]" />
+              </div>
+              <span className="text-white/60 text-sm">Easy</span>
+            </div>
+            <p className="text-2xl font-bold text-[#7ca700]">{stats.easy}</p>
+          </div>
+
+          <div className="glass rounded-xl p-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-[#ffc107]/20 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-[#ffc107]" />
+              </div>
+              <span className="text-white/60 text-sm">Medium</span>
+            </div>
+            <p className="text-2xl font-bold text-[#ffc107]">{stats.medium}</p>
+          </div>
+
+          <div className="glass rounded-xl p-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-[#ff6347]/20 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-[#ff6347]" />
+              </div>
+              <span className="text-white/60 text-sm">Hard</span>
+            </div>
+            <p className="text-2xl font-bold text-[#ff6347]">{stats.hard}</p>
+          </div>
+        </motion.div>
+
+        {/* Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="glass rounded-xl p-4 mb-6"
+        >
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+              <Input
+                type="text"
+                placeholder="Search problems or tags..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30"
+              />
+            </div>
+
+            {/* Difficulty Filter */}
+            <div className="flex gap-2">
+              {(['all', 'Easy', 'Medium', 'Hard'] as const).map((diff) => (
+                <button
+                  key={diff}
+                  onClick={() => setDifficultyFilter(diff)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    difficultyFilter === diff
+                      ? 'bg-white/20 text-white'
+                      : 'bg-white/5 text-white/60 hover:bg-white/10'
+                  }`}
+                >
+                  {diff === 'all' ? 'All' : diff}
+                </button>
+              ))}
+            </div>
+
+            {/* Tag Filter */}
+            <div className="relative">
+              <select
+                value={tagFilter}
+                onChange={(e) => setTagFilter(e.target.value)}
+                className="appearance-none px-4 py-2 pr-10 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#a088ff] min-w-[150px]"
+              >
+                <option value="all" className="bg-[#202020]">All Tags</option>
+                {allTags.map(tag => (
+                  <option key={tag} value={tag} className="bg-[#202020]">{tag}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Results Count */}
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-white/60 text-sm">
+            Showing {filteredProblems.length} of {allProblems.length} problems
+          </p>
+          <div className="flex items-center gap-2 text-sm text-white/40">
+            <CheckCircle2 className="w-4 h-4" />
+            <span>{completedProblems.size} completed</span>
+          </div>
+        </div>
+
+        {/* Problems Grid */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="grid gap-3"
+        >
+          {filteredProblems.map((problem, index) => {
+            const isCompleted = completedProblems.has(problem.id);
+            const isBookmarked = bookmarkedProblems.has(problem.id);
+            const topic = topics.find(t => t.id === problem.topic_id);
+
+            return (
+              <motion.div
+                key={problem.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.02 }}
+                className={`glass rounded-xl p-4 sm:p-5 transition-all hover:bg-white/5 ${
+                  isCompleted ? 'border-[#7ca700]/30' : ''
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  {/* Completion Toggle */}
+                  <button
+                    onClick={() => toggleComplete(problem.id)}
+                    className="flex-shrink-0"
+                  >
+                    {isCompleted ? (
+                      <CheckCircle2 className="w-6 h-6 text-[#7ca700]" />
+                    ) : (
+                      <Circle className="w-6 h-6 text-white/30 hover:text-white/60 transition-colors" />
+                    )}
+                  </button>
+
+                  {/* Problem Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <h3 className={`font-medium ${isCompleted ? 'text-white/60 line-through' : 'text-white'}`}>
+                        {problem.title}
+                      </h3>
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium difficulty-${problem.difficulty.toLowerCase()}`}>
+                        {problem.difficulty}
+                      </span>
+                      {topic && (
+                        <span 
+                          className="px-2 py-0.5 rounded text-xs"
+                          style={{ 
+                            background: `${topic.color}20`,
+                            color: topic.color
+                          }}
+                        >
+                          {topic.title}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {problem.tags.map((tag) => (
+                        <span 
+                          key={tag}
+                          className="px-2 py-0.5 rounded-full bg-white/5 text-white/50 text-xs flex items-center gap-1"
+                        >
+                          <Tag className="w-3 h-3" />
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
+                    {problem.video_link && (
+                      <a
+                        href={problem.video_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 rounded-lg bg-white/5 hover:bg-[#a088ff]/20 flex items-center justify-center transition-colors group"
+                        title="Watch Video"
+                      >
+                        <Play className="w-5 h-5 text-white/60 group-hover:text-[#a088ff]" />
+                      </a>
+                    )}
+
+                    {problem.problem_link && (
+                      <a
+                        href={problem.problem_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 rounded-lg bg-white/5 hover:bg-[#63e3ff]/20 flex items-center justify-center transition-colors group"
+                        title="Open Problem"
+                      >
+                        <ExternalLink className="w-5 h-5 text-white/60 group-hover:text-[#63e3ff]" />
+                      </a>
+                    )}
+
+                    <button
+                      onClick={() => toggleBookmark(problem.id)}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                        isBookmarked 
+                          ? 'bg-[#ffd700]/20' 
+                          : 'bg-white/5 hover:bg-[#ffd700]/10'
+                      }`}
+                      title="Bookmark"
+                    >
+                      <Bookmark className={`w-5 h-5 ${isBookmarked ? 'text-[#ffd700] fill-[#ffd700]' : 'text-white/60'}`} />
+                    </button>
+
+                    <button
+                      onClick={() => toast.info('Notes feature coming soon!')}
+                      className="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors group"
+                      title="Add Notes"
+                    >
+                      <FileText className="w-5 h-5 text-white/60 group-hover:text-white" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+
+        {filteredProblems.length === 0 && (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-white/40" />
+            </div>
+            <p className="text-white/60 text-lg mb-2">No problems found</p>
+            <p className="text-white/40 text-sm">Try adjusting your filters</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
