@@ -1,6 +1,6 @@
 
 import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Quote, Star } from 'lucide-react';
 
 const testimonials = [
@@ -53,7 +53,6 @@ const testimonials = [
 
 export function Testimonials() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(containerRef);
 
   return (
     <section id="testimonials" className="relative py-24 overflow-hidden">
