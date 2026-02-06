@@ -1,3 +1,5 @@
+
+import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Code2, BarChart3, BookOpen, Target, Trophy } from 'lucide-react';
 
@@ -46,12 +48,46 @@ const features = [
   }
 ];
 
+function SpotlightCard({ children, className = "", color = "#ffffff" }: { children: React.ReactNode; className?: string; color?: string }) {
+  const divRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [opacity, setOpacity] = useState(0);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!divRef.current) return;
+    const rect = divRef.current.getBoundingClientRect();
+    setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  };
+
+  const handleMouseEnter = () => setOpacity(1);
+  const handleMouseLeave = () => setOpacity(0);
+
+  return (
+    <div
+      ref={divRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className={`relative overflow-hidden rounded-2xl border border-white/5 bg-white/5 ${className}`}
+    >
+      <div
+        className="pointer-events-none absolute -inset-px transition duration-300 z-10"
+        style={{
+          opacity,
+          background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${color}15, transparent 40%)`,
+        }}
+      />
+      {children}
+    </div>
+  );
+}
+
 export function Features() {
   return (
     <section id="features" className="relative py-24 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 isometric-pattern opacity-20" />
-      
+
       {/* Gradient Orbs */}
       <div className="absolute top-1/2 left-0 w-96 h-96 bg-[#a088ff]/10 rounded-full blur-[120px] -translate-y-1/2" />
       <div className="absolute top-1/3 right-0 w-80 h-80 bg-[#63e3ff]/10 rounded-full blur-[100px]" />
@@ -69,7 +105,7 @@ export function Features() {
             Everything You <span className="gradient-text">Need</span>
           </h2>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            A complete platform designed to help you master coding interviews 
+            A complete platform designed to help you master coding interviews
             and become a better programmer.
           </p>
         </motion.div>
@@ -82,17 +118,17 @@ export function Features() {
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: feature.offset }}
               viewport={{ once: true }}
-              transition={{ 
-                duration: 0.6, 
+              transition={{
+                duration: 0.6,
                 delay: index * 0.1,
                 ease: [0.16, 1, 0.3, 1] as const
               }}
-              className="group"
+              className="h-full"
             >
-              <div className="relative h-full glass rounded-2xl p-6 overflow-hidden card-hover">
+              <SpotlightCard className="h-full p-6" color={feature.color}>
                 {/* Holographic Border */}
-                <div 
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                <div
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                   style={{
                     background: `linear-gradient(135deg, ${feature.color}30, transparent 50%)`,
                     padding: '1px'
@@ -102,29 +138,31 @@ export function Features() {
                 {/* Icon */}
                 <motion.div
                   whileHover={{ rotate: 5, scale: 1.1 }}
-                  className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
+                  className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 relative z-20"
                   style={{ background: `${feature.color}20` }}
                 >
-                  <feature.icon 
+                  <feature.icon
                     className="w-7 h-7"
                     style={{ color: feature.color }}
                   />
                 </motion.div>
 
                 {/* Content */}
-                <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-[#a088ff] transition-colors">
-                  {feature.title}
-                </h3>
-                <p className="text-white/60 text-sm leading-relaxed">
-                  {feature.description}
-                </p>
+                <div className="relative z-20">
+                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-[#a088ff] transition-colors">
+                    {feature.title}
+                  </h3>
+                  <p className="text-white/60 text-sm leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
 
                 {/* Hover Glow */}
-                <div 
-                  className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-[50px] opacity-0 group-hover:opacity-40 transition-opacity duration-500"
+                <div
+                  className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-[50px] opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"
                   style={{ background: feature.color }}
                 />
-              </div>
+              </SpotlightCard>
             </motion.div>
           ))}
         </div>

@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Menu, 
-  X, 
-  Code2, 
-  LayoutDashboard, 
-  Map, 
-  List, 
-  Trophy, 
+import {
+  Menu,
+  X,
+  Code2,
+  LayoutDashboard,
+  Map,
+  List,
+  Trophy,
   StickyNote,
   LogOut,
   ChevronDown,
@@ -33,21 +33,65 @@ export function Navigation({ currentView, onNavigate, onAuthClick }: NavigationP
   const { user, profile, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
+
+      // Scroll Spy Logic for Home Page
+      if (currentView === 'home') {
+        const sections = ['home', 'roadmaps'];
+        const scrollPosition = window.scrollY + 100; // Offset for header
+
+        let current = 'home';
+        for (const section of sections) {
+          const element = document.getElementById(section);
+          if (element) {
+            const top = element.offsetTop;
+            const bottom = top + element.offsetHeight;
+            if (scrollPosition >= top && scrollPosition < bottom) {
+              current = section;
+            }
+          }
+        }
+        setActiveSection(current);
+      }
     };
+
     window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [currentView]);
 
   const navLinks = [
-    { id: 'home', label: 'Home', icon: Code2, view: 'home' as const },
-    { id: 'roadmaps', label: 'Roadmaps', icon: Map, view: 'home' as const },
-    { id: 'problems', label: 'Problems', icon: List, view: 'problems' as const },
-    { id: 'leaderboard', label: 'Leaderboard', icon: Trophy, view: 'leaderboard' as const },
+    { id: 'home', label: 'Home', icon: Code2, view: 'home' as const, isAnchor: true },
+    { id: 'roadmaps', label: 'Roadmaps', icon: Map, view: 'home' as const, isAnchor: true },
+    { id: 'problems', label: 'Problems', icon: List, view: 'problems' as const, isAnchor: false },
+    { id: 'leaderboard', label: 'Leaderboard', icon: Trophy, view: 'leaderboard' as const, isAnchor: false },
   ];
+
+  const handleNavClick = (link: typeof navLinks[0]) => {
+    if (link.isAnchor) {
+      if (currentView !== 'home') {
+        onNavigate('home');
+        // Wait for navigation render then scroll
+        setTimeout(() => {
+          const element = document.getElementById(link.id);
+          element?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        const element = document.getElementById(link.id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    } else {
+      onNavigate(link.view);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -60,23 +104,20 @@ export function Navigation({ currentView, onNavigate, onAuthClick }: NavigationP
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled 
-            ? 'py-3' 
-            : 'py-5'
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
+          ? 'py-3'
+          : 'py-5'
+          }`}
       >
-        <div className={`mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-500 ${
-          isScrolled ? 'max-w-4xl' : 'max-w-7xl'
-        }`}>
-          <div className={`flex items-center justify-between transition-all duration-500 ${
-            isScrolled 
-              ? 'glass rounded-full px-6 py-3' 
-              : 'bg-transparent'
+        <div className={`mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-500 ${isScrolled ? 'max-w-4xl' : 'max-w-7xl'
           }`}>
+          <div className={`flex items-center justify-between transition-all duration-500 ${isScrolled
+            ? 'glass rounded-full px-6 py-3'
+            : 'bg-transparent'
+            }`}>
             {/* Logo */}
             <motion.button
-              onClick={() => onNavigate('home')}
+              onClick={() => handleNavClick(navLinks[0])}
               className="flex items-center gap-2 group"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -85,35 +126,40 @@ export function Navigation({ currentView, onNavigate, onAuthClick }: NavigationP
                 <Code2 className="w-5 h-5 text-[#141414]" />
               </div>
               <span className="font-display text-2xl text-white hidden sm:block">
-                CodeMastery
+                AlgoForge
               </span>
             </motion.button>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-1">
-              {navLinks.map((link, index) => (
-                <motion.button
-                  key={link.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2 + index * 0.1 }}
-                  onClick={() => onNavigate(link.view)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 relative group ${
-                    currentView === link.view || (link.id === 'roadmaps' && currentView === 'topic')
+              {navLinks.map((link, index) => {
+                const isActive = currentView === 'home'
+                  ? (link.isAnchor ? activeSection === link.id : false)
+                  : currentView === link.view;
+
+                return (
+                  <motion.button
+                    key={link.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 + index * 0.1 }}
+                    onClick={() => handleNavClick(link)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 relative group ${isActive
                       ? 'text-white'
                       : 'text-white/60 hover:text-white'
-                  }`}
-                >
-                  {currentView === link.view || (link.id === 'roadmaps' && currentView === 'topic') ? (
-                    <motion.div
-                      layoutId="nav-pill"
-                      className="absolute inset-0 bg-white/10 rounded-full"
-                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                    />
-                  ) : null}
-                  <span className="relative z-10">{link.label}</span>
-                </motion.button>
-              ))}
+                      }`}
+                  >
+                    {isActive ? (
+                      <motion.div
+                        layoutId="nav-pill"
+                        className="absolute inset-0 bg-white/10 rounded-full"
+                        transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                      />
+                    ) : null}
+                    <span className="relative z-10">{link.label}</span>
+                  </motion.button>
+                );
+              })}
             </div>
 
             {/* Right Side */}
@@ -146,14 +192,14 @@ export function Navigation({ currentView, onNavigate, onAuthClick }: NavigationP
                         <p className="text-xs text-white/60 truncate">{user.email}</p>
                       </div>
                       <DropdownMenuSeparator className="bg-white/10" />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => onNavigate('dashboard')}
                         className="text-white/80 hover:text-white hover:bg-white/5 cursor-pointer"
                       >
                         <LayoutDashboard className="w-4 h-4 mr-2" />
                         Dashboard
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => onNavigate('notes')}
                         className="text-white/80 hover:text-white hover:bg-white/5 cursor-pointer"
                       >
@@ -161,7 +207,7 @@ export function Navigation({ currentView, onNavigate, onAuthClick }: NavigationP
                         My Notes
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-white/10" />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={handleSignOut}
                         className="text-red-400 hover:text-red-300 hover:bg-red-500/10 cursor-pointer"
                       >
@@ -222,17 +268,16 @@ export function Navigation({ currentView, onNavigate, onAuthClick }: NavigationP
                     onNavigate(link.view);
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                    currentView === link.view
-                      ? 'bg-[#a088ff]/20 text-white'
-                      : 'text-white/60 hover:bg-white/5 hover:text-white'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${currentView === link.view
+                    ? 'bg-[#a088ff]/20 text-white'
+                    : 'text-white/60 hover:bg-white/5 hover:text-white'
+                    }`}
                 >
                   <link.icon className="w-5 h-5" />
                   {link.label}
                 </button>
               ))}
-              
+
               {!user && (
                 <div className="pt-2 border-t border-white/10 space-y-2">
                   <Button

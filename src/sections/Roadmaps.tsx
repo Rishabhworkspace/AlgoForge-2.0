@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Binary, 
-  Cpu, 
-  GitBranch, 
-  Network, 
-  Briefcase, 
+import {
+  Binary,
+  Cpu,
+  GitBranch,
+  Network,
+  Briefcase,
   Server,
   ArrowRight,
   PlayCircle
@@ -54,7 +54,7 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
     <section id="roadmaps" className="relative py-24 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 grid-pattern opacity-20" />
-      
+
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -68,7 +68,7 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
             Learning <span className="gradient-text">Roadmaps</span>
           </h2>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            Choose your path and start your journey. Each roadmap is carefully curated 
+            Choose your path and start your journey. Each roadmap is carefully curated
             to take you from beginner to expert.
           </p>
         </motion.div>
@@ -94,11 +94,11 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
                 onMouseLeave={() => setHoveredCategory(null)}
                 className="group relative"
               >
-                <div 
+                <div
                   className="relative h-full glass rounded-2xl p-6 overflow-hidden card-hover cursor-pointer"
                   style={{
-                    transform: hoveredCategory === category.id 
-                      ? 'translateY(-4px) scale(1.02)' 
+                    transform: hoveredCategory === category.id
+                      ? 'translateY(-4px) scale(1.02)'
                       : 'translateY(0) scale(1)',
                     transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
                   }}
@@ -109,7 +109,7 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
                   }}
                 >
                   {/* Gradient Border Effect */}
-                  <div 
+                  <div
                     className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                     style={{
                       background: `linear-gradient(135deg, ${category.color}40, transparent)`,
@@ -121,12 +121,12 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
                   <div className="relative z-10">
                     {/* Icon & Title */}
                     <div className="flex items-start justify-between mb-4">
-                      <div 
+                      <div
                         className="w-14 h-14 rounded-xl flex items-center justify-center"
                         style={{ background: `${category.color}20` }}
                       >
-                        <Icon 
-                          className="w-7 h-7" 
+                        <Icon
+                          className="w-7 h-7"
                           style={{ color: category.color }}
                         />
                       </div>
@@ -163,7 +163,7 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
                     {/* Topics Preview */}
                     <div className="space-y-2">
                       {topics.slice(0, 3).map((topic) => (
-                        <div 
+                        <div
                           key={topic.id}
                           className="flex items-center gap-2 text-sm text-white/60"
                         >
@@ -180,7 +180,7 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
 
                     {/* CTA */}
                     <div className="mt-6 pt-4 border-t border-white/10">
-                      <button 
+                      <button
                         className="flex items-center gap-2 text-sm font-medium group/btn"
                         style={{ color: category.color }}
                       >
@@ -191,7 +191,7 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
                   </div>
 
                   {/* Hover Glow */}
-                  <div 
+                  <div
                     className="absolute -bottom-20 -right-20 w-40 h-40 rounded-full blur-[60px] opacity-0 group-hover:opacity-50 transition-opacity duration-500"
                     style={{ background: category.color }}
                   />
@@ -215,11 +215,11 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
             { label: 'Learning Paths', value: '12', color: '#ff8a63' },
             { label: 'Active Learners', value: '10K+', color: '#88ff9f' }
           ].map((stat) => (
-            <div 
+            <div
               key={stat.label}
               className="glass rounded-xl p-4 text-center"
             >
-              <p 
+              <p
                 className="text-2xl sm:text-3xl font-bold mb-1"
                 style={{ color: stat.color }}
               >

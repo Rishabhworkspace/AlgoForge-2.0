@@ -1,9 +1,9 @@
 import { } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Flame, 
-  Trophy, 
-  Target, 
+import {
+  Flame,
+  Trophy,
+  Target,
   CheckCircle2,
   BookOpen,
   ArrowRight
@@ -211,7 +211,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
               <div className="space-y-3">
                 {mockStats.recentActivity.map((activity, index) => (
-                  <div 
+                  <div
                     key={index}
                     className="flex items-center justify-between p-3 rounded-xl bg-white/5"
                   >
@@ -242,7 +242,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">Badges</h3>
-                <button 
+                <button
                   onClick={() => onNavigate('leaderboard')}
                   className="text-sm text-[#a088ff] hover:text-[#63e3ff] transition-colors"
                 >
@@ -251,17 +251,15 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {mockBadges.map((badge) => (
-                  <div 
+                  <div
                     key={badge.id}
-                    className={`p-3 rounded-xl text-center ${
-                      badge.earned 
-                        ? 'bg-gradient-to-br from-[#a088ff]/20 to-[#63e3ff]/20' 
+                    className={`p-3 rounded-xl text-center ${badge.earned
+                        ? 'bg-gradient-to-br from-[#a088ff]/20 to-[#63e3ff]/20'
                         : 'bg-white/5 opacity-50'
-                    }`}
+                      }`}
                   >
-                    <div className={`w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center ${
-                      badge.earned ? 'bg-[#a088ff]/30' : 'bg-white/10'
-                    }`}>
+                    <div className={`w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center ${badge.earned ? 'bg-[#a088ff]/30' : 'bg-white/10'
+                      }`}>
                       <Trophy className={`w-5 h-5 ${badge.earned ? 'text-[#a088ff]' : 'text-white/40'}`} />
                     </div>
                     <p className={`text-xs ${badge.earned ? 'text-white' : 'text-white/40'}`}>
@@ -287,7 +285,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                     onClick={() => onNavigate('topic', topic.id)}
                     className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-left group"
                   >
-                    <div 
+                    <div
                       className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{ background: `${topic.color}20` }}
                     >
@@ -297,11 +295,11 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                       <p className="text-white text-sm font-medium truncate">{topic.title}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                          <div 
+                          <div
                             className="h-full rounded-full"
-                            style={{ 
+                            style={{
                               width: '30%',
-                              background: topic.color 
+                              background: topic.color
                             }}
                           />
                         </div>
@@ -328,7 +326,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <p className="text-white/60 text-sm mb-4">
                 Complete today's challenge to maintain your streak!
               </p>
-              <button 
+              <button
                 onClick={() => toast.info('Daily challenge coming soon!')}
                 className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#ff8a63] to-[#ff6347] text-white font-medium hover:opacity-90 transition-opacity"
               >

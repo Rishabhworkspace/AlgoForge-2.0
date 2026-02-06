@@ -26,6 +26,7 @@ function AppContent() {
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     // Check for hash-based navigation
@@ -46,6 +47,18 @@ function AppContent() {
       }
     }
   }, [user]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleNavigate = (view: View, topicId?: string) => {
     if ((view === 'dashboard' || view === 'notes') && !user) {
@@ -80,9 +93,9 @@ function AppContent() {
         return <Dashboard onNavigate={handleNavigate} />;
       case 'topic':
         return selectedTopicId ? (
-          <TopicDetail 
-            topicId={selectedTopicId} 
-            onBack={() => handleNavigate('home')} 
+          <TopicDetail
+            topicId={selectedTopicId}
+            onBack={() => handleNavigate('home')}
           />
         ) : (
           <Roadmaps onTopicClick={handleTopicClick} />
@@ -125,12 +138,12 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-[#141414]">
-      <Navigation 
+      <Navigation
         currentView={currentView}
         onNavigate={handleNavigate}
         onAuthClick={handleAuthClick}
       />
-      
+
       <main>
         <AnimatePresence mode="wait">
           <motion.div
@@ -147,13 +160,39 @@ function AppContent() {
 
       {currentView === 'home' && <Footer onNavigate={handleNavigate} />}
 
-      <AuthModal 
+      <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         defaultMode={authMode}
       />
-      
-      <Toaster 
+
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            onClick={scrollToTop}
+            className="fixed bottom-8 right-8 p-3 rounded-full bg-[#a088ff] text-white shadow-lg z-50 hover:bg-[#8f76fa] transition-colors"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 10l7-7m0 0l7 7m-7-7v18"
+              />
+            </svg>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      <Toaster
         position="top-right"
         toastOptions={{
           style: {

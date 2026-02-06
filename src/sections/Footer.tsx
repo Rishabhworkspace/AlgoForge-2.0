@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { 
-  Code2, 
-  Github, 
-  Twitter, 
-  Linkedin, 
+import {
+  Code2,
+  Github,
+  Twitter,
+  Linkedin,
   Youtube,
   Mail,
   MapPin,
@@ -78,13 +78,13 @@ export function Footer({ onNavigate }: FooterProps) {
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#a088ff] to-[#63e3ff] flex items-center justify-center">
                   <Code2 className="w-5 h-5 text-[#141414]" />
                 </div>
-                <span className="font-display text-2xl text-white">CodeMastery</span>
+                <span className="font-display text-2xl text-white">AlgoForge</span>
               </div>
               <p className="text-white/60 text-sm mb-6 max-w-xs">
-                Master coding, one step at a time. Structured learning paths for DSA, 
+                Master coding, one step at a time. Structured learning paths for DSA,
                 interview prep, and beyond.
               </p>
-              
+
               {/* Social Links */}
               <div className="flex gap-3">
                 {socialLinks.map((social) => (
@@ -184,7 +184,7 @@ export function Footer({ onNavigate }: FooterProps) {
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-sm text-white/60">
                 <Mail className="w-4 h-4" />
-                hello@codemastery.io
+                hello@algoforge.io
               </li>
               <li className="flex items-center gap-2 text-sm text-white/60">
                 <Phone className="w-4 h-4" />
@@ -227,7 +227,7 @@ export function Footer({ onNavigate }: FooterProps) {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-white/40">
-            © {new Date().getFullYear()} CodeMastery. All rights reserved.
+            © {new Date().getFullYear()} AlgoForge. All rights reserved.
           </p>
           <div className="flex gap-6">
             {footerLinks.legal.map((link) => (

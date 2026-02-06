@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .select('*')
       .eq('id', userId)
       .single();
-    
+
     if (!error && data) {
       setProfile(data);
     }
@@ -61,14 +61,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, name: string) => {
-    const { error, data } = await supabase.auth.signUp({ 
-      email, 
+    const { error, data } = await supabase.auth.signUp({
+      email,
       password,
       options: {
         data: { name }
       }
     });
-    
+
     if (!error && data.user) {
       // Create user profile
       const profileData = {
@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       await supabase.from('users').insert(profileData as any);
     }
-    
+
     return { error };
   };
 
@@ -105,30 +105,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateProfile = async (updates: Record<string, unknown>) => {
     if (!user) return { error: new Error('Not authenticated') };
-    
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase
       .from('users') as any)
       .update(updates)
       .eq('id', user.id);
-    
+
     if (!error && profile) {
       setProfile({ ...profile, ...updates });
     }
-    
+
     return { error };
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      profile, 
-      isLoading, 
-      signIn, 
-      signUp, 
-      signInWithGoogle, 
+    <AuthContext.Provider value={{
+      user,
+      profile,
+      isLoading,
+      signIn,
+      signUp,
+      signInWithGoogle,
       signOut,
-      updateProfile 
+      updateProfile
     }}>
       {children}
     </AuthContext.Provider>
