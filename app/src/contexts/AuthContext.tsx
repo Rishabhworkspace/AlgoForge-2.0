@@ -12,7 +12,7 @@ interface AuthContextType {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error: any }>;
-  signInWithGoogle: (credential?: string) => Promise<{ error: any }>;
+  signInWithGoogle: (credential?: string) => Promise<{ error: any; isNewUser?: boolean }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: any) => Promise<{ error: any }>;
 }
@@ -159,7 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(userObj);
       setProfile({ ...data, id: data._id });
 
-      return { error: null };
+      return { error: null, isNewUser: data.isNewUser };
     } catch (err) {
       return { error: 'Network error during Google Auth' };
     }

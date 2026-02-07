@@ -54,10 +54,14 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
 
   const handleGoogleSignIn = async (credential?: string) => {
     setIsLoading(true);
-    const { error } = await signInWithGoogle(credential);
+    const { error, isNewUser } = await signInWithGoogle(credential);
     if (error) {
       toast.error(error || 'Failed to sign in with Google');
       setIsLoading(false);
+    } else {
+      toast.success(isNewUser ? 'Account created successfully!' : 'Welcome back!');
+      onClose();
+      setIsLoading(false); // Optional, since modal closes, but good for cleanup
     }
   };
 

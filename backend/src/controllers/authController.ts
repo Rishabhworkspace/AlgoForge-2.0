@@ -94,6 +94,7 @@ export const googleAuth = async (req: Request, res: Response) => {
         const { email, name, sub: googleId, picture: avatar } = payload;
 
         let user: any = await User.findOne({ email });
+        let isNewUser = false;
 
         if (user) {
             // User exists, update googleId if not present
@@ -103,6 +104,7 @@ export const googleAuth = async (req: Request, res: Response) => {
             }
         } else {
             // Create new user
+            isNewUser = true;
             user = await User.create({
                 name,
                 email,
@@ -116,7 +118,8 @@ export const googleAuth = async (req: Request, res: Response) => {
             _id: user.id,
             name: user.name,
             email: user.email,
-            token: generateToken(user.id)
+            token: generateToken(user.id),
+            isNewUser
         });
 
     } catch (error) {
