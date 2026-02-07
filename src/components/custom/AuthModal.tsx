@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { GoogleLogin } from '@react-oauth/google';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Lock, User, Chrome, Eye, EyeOff } from 'lucide-react';
+import { X, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,7 +31,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
       if (mode === 'login') {
         const { error } = await signIn(email, password);
         if (error) {
-          toast.error(error.message || 'Failed to sign in');
+          toast.error(error || 'Failed to sign in');
         } else {
           toast.success('Welcome back!');
           onClose();
@@ -38,7 +39,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
       } else {
         const { error } = await signUp(email, password, name);
         if (error) {
-          toast.error(error.message || 'Failed to sign up');
+          toast.error(error || 'Failed to sign up');
         } else {
           toast.success('Account created! Please check your email to verify.');
           onClose();
@@ -51,11 +52,11 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async (credential?: string) => {
     setIsLoading(true);
-    const { error } = await signInWithGoogle();
+    const { error } = await signInWithGoogle(credential);
     if (error) {
-      toast.error(error.message || 'Failed to sign in with Google');
+      toast.error(error || 'Failed to sign in with Google');
       setIsLoading(false);
     }
   };
@@ -106,8 +107,8 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
                     {mode === 'login' ? 'Welcome Back' : 'Get Started'}
                   </h2>
                   <p className="text-white/60 text-sm">
-                    {mode === 'login' 
-                      ? 'Continue your coding journey' 
+                    {mode === 'login'
+                      ? 'Continue your coding journey'
                       : 'Join thousands of learners'}
                   </p>
                 </div>
@@ -117,16 +118,20 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
             {/* Content */}
             <div className="p-6">
               {/* Google Sign In */}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleGoogleSignIn}
-                disabled={isLoading}
-                className="w-full mb-4 border-white/20 text-white hover:bg-white/5 h-11"
-              >
-                <Chrome className="w-5 h-5 mr-2" />
-                Continue with Google
-              </Button>
+              <div className="w-full mb-4 flex justify-center">
+                <GoogleLogin
+                  onSuccess={credentialResponse => {
+                    handleGoogleSignIn(credentialResponse.credential);
+                  }}
+                  onError={() => {
+                    toast.error('Google Sign In Failed');
+                  }}
+                  theme="filled_black"
+                  shape="circle"
+                  text="continue_with"
+                  width="300"
+                />
+              </div>
 
               <div className="relative mb-4">
                 <div className="absolute inset-0 flex items-center">

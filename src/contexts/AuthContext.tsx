@@ -1,6 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase/client';
-import type { User } from '@supabase/supabase-js';
+
+// User type matching backend response
+interface User {
+  id: string;
+  email: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -8,12 +12,15 @@ interface AuthContextType {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error: any }>;
-  signInWithGoogle: () => Promise<{ error: any }>;
+  signInWithGoogle: (credential?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: any) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -21,102 +28,154 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
+    const checkSession = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
-    });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/users/me`, {
+
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (res.ok) {
+          const userData = await res.json();
+          // Backend returns _id, map to id
+          const userObj = {
+            id: userData._id,
+            email: userData.email
+          };
+
+          setUser(userObj);
+          setProfile({ ...userData, id: userData._id });
+        } else {
+          localStorage.removeItem('token');
+          setUser(null);
+          setProfile(null);
+        }
+      } catch (error) {
+        console.error('Session check failed', error);
+        localStorage.removeItem('token');
+      } finally {
+        setIsLoading(false);
       }
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    checkSession();
   }, []);
 
-  const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
-    if (!error && data) {
-      setProfile(data);
-    }
-  };
-
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users/login`, {
+
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { error: data.message || 'Login failed' };
+      }
+
+      localStorage.setItem('token', data.token);
+
+      const userObj = {
+        id: data._id,
+        email: data.email
+      };
+
+      setUser(userObj);
+      setProfile({ ...data, id: data._id });
+
+      return { error: null };
+    } catch (err) {
+      return { error: 'Network error. Ensure backend is running.' };
+    }
   };
 
   const signUp = async (email: string, password: string, name: string) => {
-    const { error, data } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { name }
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users`, {
+
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { error: data.message || 'Signup failed' };
       }
-    });
 
-    if (!error && data.user) {
-      // Create user profile
-      const profileData = {
-        id: data.user.id,
-        name,
-        email,
-        avatar_url: null,
-        created_at: new Date().toISOString(),
-        xp_points: 0,
-        streak_days: 0,
-        last_active: new Date().toISOString()
+      localStorage.setItem('token', data.token);
+
+      const userObj = {
+        id: data._id,
+        email: data.email
       };
-      await supabase.from('users').insert(profileData as any);
-    }
 
-    return { error };
+      setUser(userObj);
+      setProfile({ ...data, id: data._id });
+
+      return { error: null };
+    } catch (err) {
+      return { error: 'Network error. Ensure backend is running.' };
+    }
   };
 
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+  const signInWithGoogle = async (credential?: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users/google`, {
+
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ token: credential })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { error: data.message || 'Google Auth failed' };
       }
-    });
-    return { error };
+
+      // Success
+      localStorage.setItem('token', data.token);
+
+      const userObj = {
+        id: data._id,
+        email: data.email
+      };
+
+      setUser(userObj);
+      setProfile({ ...data, id: data._id });
+
+      return { error: null };
+    } catch (err) {
+      return { error: 'Network error during Google Auth' };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem('token');
     setUser(null);
     setProfile(null);
   };
 
   const updateProfile = async (updates: Record<string, unknown>) => {
-    if (!user) return { error: new Error('Not authenticated') };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase
-      .from('users') as any)
-      .update(updates)
-      .eq('id', user.id);
-
-    if (!error && profile) {
-      setProfile({ ...profile, ...updates });
-    }
-
-    return { error };
+    if (!profile) return { error: new Error('Not authenticated') };
+    // This assumes specific update logic will be added to backend later
+    setProfile({ ...profile, ...updates });
+    return { error: null };
   };
 
   return (
