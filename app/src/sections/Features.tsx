@@ -2,51 +2,9 @@
 import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Code2, BarChart3, BookOpen, Target, Trophy } from 'lucide-react';
+import { useStats } from '@/hooks/useStats';
 
-const features = [
-  {
-    icon: Play,
-    title: 'Video Solutions',
-    description: 'Watch step-by-step explanations for every problem. Learn from expert instructors with clear, concise videos.',
-    color: '#a088ff',
-    offset: 0
-  },
-  {
-    icon: Code2,
-    title: 'Practice Problems',
-    description: '500+ carefully curated problems from easy to hard. Practice with real interview questions from top companies.',
-    color: '#63e3ff',
-    offset: -40
-  },
-  {
-    icon: BarChart3,
-    title: 'Progress Tracking',
-    description: 'Track your learning journey with detailed analytics. See your improvement over time with visual insights.',
-    color: '#ff8a63',
-    offset: 20
-  },
-  {
-    icon: BookOpen,
-    title: 'Personal Notes',
-    description: 'Take notes on any problem. Save your learnings and revisit them anytime with our markdown editor.',
-    color: '#88ff9f',
-    offset: -20
-  },
-  {
-    icon: Target,
-    title: 'Daily Challenges',
-    description: 'Get a new set of problems every day. Maintain your streak and build consistent learning habits.',
-    color: '#ff88c9',
-    offset: 40
-  },
-  {
-    icon: Trophy,
-    title: 'Gamification',
-    description: 'Earn XP, unlock badges, and climb the leaderboard. Make learning fun and competitive.',
-    color: '#ffd700',
-    offset: -10
-  }
-];
+
 
 function SpotlightCard({ children, className = "", color = "#ffffff" }: { children: React.ReactNode; className?: string; color?: string }) {
   const divRef = useRef<HTMLDivElement>(null);
@@ -83,6 +41,53 @@ function SpotlightCard({ children, className = "", color = "#ffffff" }: { childr
 }
 
 export function Features() {
+  const { problemCount } = useStats();
+
+  const features = [
+    {
+      icon: Play,
+      title: 'Video Solutions',
+      description: 'Watch step-by-step explanations for every problem. Learn from expert instructors with clear, concise videos.',
+      color: '#a088ff',
+      offset: 0
+    },
+    {
+      icon: Code2,
+      title: 'Practice Problems',
+      description: `${problemCount} carefully curated problems from easy to hard. Practice with real interview questions from top companies.`,
+      color: '#63e3ff',
+      offset: -40
+    },
+    {
+      icon: BarChart3,
+      title: 'Progress Tracking',
+      description: 'Track your learning journey with detailed analytics. See your improvement over time with visual insights.',
+      color: '#ff8a63',
+      offset: 20
+    },
+    {
+      icon: BookOpen,
+      title: 'Personal Notes',
+      description: 'Take notes on any problem. Save your learnings and revisit them anytime with our markdown editor.',
+      color: '#88ff9f',
+      offset: -20
+    },
+    {
+      icon: Target,
+      title: 'Daily Challenges',
+      description: 'Get a new set of problems every day. Maintain your streak and build consistent learning habits.',
+      color: '#ff88c9',
+      offset: 40
+    },
+    {
+      icon: Trophy,
+      title: 'Gamification',
+      description: 'Earn XP, unlock badges, and climb the leaderboard. Make learning fun and competitive.',
+      color: '#ffd700',
+      offset: -10
+    }
+  ];
+
   return (
     <section id="features" className="relative py-24 overflow-hidden">
       {/* Background */}

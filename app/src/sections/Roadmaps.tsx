@@ -11,6 +11,7 @@ import {
   PlayCircle
 } from 'lucide-react';
 import { roadmapCategories, getTopicsByCategory } from '@/data/roadmaps';
+import { useStats } from '@/hooks/useStats';
 
 interface RoadmapsProps {
   onTopicClick: (topicId: string) => void;
@@ -27,6 +28,7 @@ const iconMap: Record<string, React.ElementType> = {
 
 export function Roadmaps({ onTopicClick }: RoadmapsProps) {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const { problemCount, videoCount, roadmapCount, userCount } = useStats();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -210,10 +212,10 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
           className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4"
         >
           {[
-            { label: 'Total Problems', value: '500+', color: '#a088ff' },
-            { label: 'Video Solutions', value: '300+', color: '#63e3ff' },
-            { label: 'Learning Paths', value: '12', color: '#ff8a63' },
-            { label: 'Active Learners', value: '10K+', color: '#88ff9f' }
+            { label: 'Total Problems', value: problemCount, color: '#a088ff' },
+            { label: 'Video Solutions', value: videoCount, color: '#63e3ff' },
+            { label: 'Learning Paths', value: roadmapCount, color: '#ff8a63' },
+            { label: 'Active Learners', value: userCount, color: '#88ff9f' }
           ].map((stat) => (
             <div
               key={stat.label}

@@ -3,7 +3,7 @@ import { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Users, Star, Sparkles, Terminal, Cpu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { problems } from '@/data/roadmaps';
+import { useStats } from '@/hooks/useStats';
 
 
 interface HeroProps {
@@ -134,52 +134,7 @@ export function Hero({ onGetStarted }: HeroProps) {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9]);
 
-  const [userCount, setUserCount] = useState<string>('10K+');
-  const [problemCount, setProblemCount] = useState<string>('500+');
-
-  useEffect(() => {
-    // Calculate problem count from data
-    if (problems && problems.length > 0) {
-      setProblemCount(`${problems.length}+`);
-    }
-
-    // Fetch user count from backend
-    const fetchStats = async () => {
-      try {
-        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-        const res = await fetch(`${API_URL}/api/info/stats`);
-        if (res.ok) {
-          const data = await res.json();
-          // Format user count (e.g., 1200 -> 1.2K+)
-          let count = data.userCount;
-          let formattedCount = `${count}`;
-
-          if (count >= 1000) {
-            formattedCount = `${(count / 1000).toFixed(1)}K+`;
-          } else {
-            formattedCount = `${count}`;
-          }
-
-          // Fallback to 10K+ if count is low (for social proof in early stages)
-          // In a real app, you might want to show real numbers always or hide if too low.
-          // For this clone, we showing real data but if its 0 it looks weird, so maybe start with basic number?
-          // The prompt asked for "real data", so we should show real data.
-          // But let's keep the fallback only if fetch fails.
-          setUserCount(formattedCount);
-          if (count < 10 && count > 0) {
-            setUserCount(`${count}`);
-          } else if (count === 0) {
-            setUserCount(`10K+`); // Keep initial state or show 0? Showing 10K+ as placeholder might be better for "clone" feeling
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-        // Keep default '10K+' on error
-      }
-    };
-
-    fetchStats();
-  }, []);
+  const { userCount, problemCount } = useStats();
 
   return (
     <section

@@ -2,6 +2,7 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Quote, Star } from 'lucide-react';
+import { useStats } from '@/hooks/useStats';
 
 const testimonials = [
   {
@@ -53,6 +54,7 @@ const testimonials = [
 
 export function Testimonials() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { userCount, problemCount } = useStats();
 
   return (
     <section id="testimonials" className="relative py-24 overflow-hidden">
@@ -142,11 +144,11 @@ export function Testimonials() {
             <p className="text-sm text-white/60">Average Rating</p>
           </div>
           <div>
-            <p className="text-3xl sm:text-4xl font-bold text-[#63e3ff] mb-1">10K+</p>
+            <p className="text-3xl sm:text-4xl font-bold text-[#63e3ff] mb-1">{userCount}</p>
             <p className="text-sm text-white/60">Happy Learners</p>
           </div>
           <div>
-            <p className="text-3xl sm:text-4xl font-bold text-[#ff8a63] mb-1">500+</p>
+            <p className="text-3xl sm:text-4xl font-bold text-[#ff8a63] mb-1">{problemCount}</p>
             <p className="text-sm text-white/60">Success Stories</p>
           </div>
         </motion.div>
