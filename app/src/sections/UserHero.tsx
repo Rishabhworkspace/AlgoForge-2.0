@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Flame, Zap, CheckCircle2, Trophy, Activity, PlayCircle, Clock, Target } from 'lucide-react';
+import { Flame, Zap, CheckCircle2, Trophy, PlayCircle, Clock, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { problems } from '@/data/roadmaps';
 
@@ -12,8 +12,7 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
 
     // Calculate generic rank/level based on XP
     const level = Math.floor((user.xp_points || 0) / 100) + 1;
-    const nextLevelXp = level * 100;
-    const progressToNextLevel = ((user.xp_points || 0) % 100) / 100 * 100;
+    // Unused variables removed: nextLevelXp, progressToNextLevel
 
     // --- Dynamic Stats Calculations ---
 
@@ -23,13 +22,8 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
 
     // Difficulty Counts
     let easySolved = 0, mediumSolved = 0, hardSolved = 0;
-    let easyTotal = 0, mediumTotal = 0, hardTotal = 0;
 
     problems.forEach(p => {
-        if (p.difficulty === 'Easy') easyTotal++;
-        if (p.difficulty === 'Medium') mediumTotal++;
-        if (p.difficulty === 'Hard') hardTotal++;
-
         if (solvedIds.has(p.id)) {
             if (p.difficulty === 'Easy') easySolved++;
             if (p.difficulty === 'Medium') mediumSolved++;
@@ -41,9 +35,8 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
 
     // Weekly Activity Log
     // user.solvedProblems has { problemId, solvedAt }
-    const activityMap = new Map<string, number>();
     const today = new Date();
-    const last7Days = [];
+    const last7Days: { date: string; day: string; count: number }[] = [];
 
     for (let i = 6; i >= 0; i--) {
         const d = new Date();
@@ -52,7 +45,6 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
         // Format day name (Mon, Tue)
         const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
         last7Days.push({ date: dateStr, day: dayName, count: 0 });
-        activityMap.set(dateStr, 0); // Initialize
     }
 
     user.solvedProblems?.forEach((p: any) => {
