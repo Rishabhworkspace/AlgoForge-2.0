@@ -4,6 +4,11 @@ import { createContext, useContext, useEffect, useState } from 'react';
 interface User {
   id: string;
   email: string;
+  name: string;
+  xp_points?: number;
+  streak_days?: number;
+  solvedProblems?: any[];
+  activityLog?: any[];
 }
 
 interface AuthContextType {
@@ -48,7 +53,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Backend returns _id, map to id
           const userObj = {
             id: userData._id,
-            email: userData.email
+            email: userData.email,
+            name: userData.name,
+            xp_points: userData.xp_points,
+            streak_days: userData.streak_days,
+            solvedProblems: userData.solvedProblems,
+            activityLog: userData.activityLog
           };
 
           setUser(userObj);
@@ -88,7 +98,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const userObj = {
         id: data._id,
-        email: data.email
+        email: data.email,
+        name: data.name,
+        xp_points: data.xp_points,
+        streak_days: data.streak_days,
+        solvedProblems: data.solvedProblems,
+        activityLog: data.activityLog
       };
 
       setUser(userObj);
@@ -119,7 +134,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const userObj = {
         id: data._id,
-        email: data.email
+        email: data.email,
+        name: data.name,
+        xp_points: data.xp_points,
+        streak_days: data.streak_days,
+        solvedProblems: data.solvedProblems,
+        activityLog: data.activityLog
       };
 
       setUser(userObj);
@@ -153,7 +173,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const userObj = {
         id: data._id,
-        email: data.email
+        email: data.email,
+        name: data.name,
+        xp_points: data.xp_points,
+        streak_days: data.streak_days,
+        solvedProblems: data.solvedProblems,
+        activityLog: data.activityLog
       };
 
       setUser(userObj);

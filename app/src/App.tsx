@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { Navigation } from '@/components/custom/Navigation';
 import { Hero } from '@/sections/Hero';
+import { UserHero } from '@/sections/UserHero';
 import { Roadmaps } from '@/sections/Roadmaps';
 import { Features } from '@/sections/Features';
 import { HowItWorks } from '@/sections/HowItWorks';
@@ -140,7 +141,12 @@ function AppContent() {
         return <Leaderboard />;
       case 'home':
       default:
-        return (
+        return user ? (
+          <>
+            <UserHero user={user} onTopicClick={handleTopicClick} />
+            <Roadmaps onTopicClick={handleTopicClick} />
+          </>
+        ) : (
           <>
             <Hero onGetStarted={() => handleAuthClick('signup')} />
             <Roadmaps onTopicClick={handleTopicClick} />
