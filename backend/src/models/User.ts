@@ -33,7 +33,25 @@ const userSchema = new mongoose.Schema({
     last_active: {
         type: Date,
         default: Date.now
-    }
+    },
+    solvedProblems: [{
+        problemId: String,
+        solvedAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
+    bookmarks: [String],
+    activityLog: [{
+        date: {
+            type: String, // YYYY-MM-DD
+            required: true
+        },
+        count: {
+            type: Number,
+            default: 1
+        }
+    }]
 }, {
     timestamps: true
 });

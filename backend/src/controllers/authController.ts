@@ -41,7 +41,12 @@ export const registerUser = async (req: Request, res: Response) => {
             _id: user.id,
             name: user.name,
             email: user.email,
-            token: generateToken(user.id)
+            token: generateToken(user.id),
+            xp_points: user.xp_points,
+            streak_days: user.streak_days,
+            solvedProblems: user.solvedProblems,
+            bookmarks: user.bookmarks,
+            activityLog: user.activityLog
         });
     } else {
         res.status(400).json({ message: 'Invalid user data' });
@@ -62,7 +67,12 @@ export const loginUser = async (req: Request, res: Response) => {
             _id: user.id,
             name: user.name,
             email: user.email,
-            token: generateToken(user.id)
+            token: generateToken(user.id),
+            xp_points: user.xp_points,
+            streak_days: user.streak_days,
+            solvedProblems: user.solvedProblems,
+            bookmarks: user.bookmarks,
+            activityLog: user.activityLog
         });
     } else {
         res.status(400).json({ message: 'Invalid credentials' });
@@ -119,6 +129,11 @@ export const googleAuth = async (req: Request, res: Response) => {
             name: user.name,
             email: user.email,
             token: generateToken(user.id),
+            xp_points: user.xp_points,
+            streak_days: user.streak_days,
+            solvedProblems: user.solvedProblems,
+            bookmarks: user.bookmarks,
+            activityLog: user.activityLog,
             isNewUser
         });
 
