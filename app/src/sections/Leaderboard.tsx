@@ -1,41 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Trophy, 
-  Medal, 
-  Flame, 
-  Target, 
+import {
+  Trophy,
+  Medal,
+  Flame,
+  Target,
   Crown,
   Zap
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Mock leaderboard data
-const leaderboardData = [
-  { id: '1', name: 'Alex Chen', avatar: 'AC', xp: 15250, streak: 45, solved: 342, rank: 1 },
-  { id: '2', name: 'Sarah Johnson', avatar: 'SJ', xp: 14800, streak: 38, solved: 318, rank: 2 },
-  { id: '3', name: 'Mike Williams', avatar: 'MW', xp: 14200, streak: 42, solved: 295, rank: 3 },
-  { id: '4', name: 'Emily Davis', avatar: 'ED', xp: 13500, streak: 28, solved: 280, rank: 4 },
-  { id: '5', name: 'James Brown', avatar: 'JB', xp: 12900, streak: 35, solved: 265, rank: 5 },
-  { id: '6', name: 'Lisa Anderson', avatar: 'LA', xp: 12200, streak: 21, solved: 248, rank: 6 },
-  { id: '7', name: 'David Wilson', avatar: 'DW', xp: 11800, streak: 18, solved: 235, rank: 7 },
-  { id: '8', name: 'Emma Taylor', avatar: 'ET', xp: 11200, streak: 25, solved: 220, rank: 8 },
-  { id: '9', name: 'Chris Martin', avatar: 'CM', xp: 10800, streak: 15, solved: 205, rank: 9 },
-  { id: '10', name: 'Olivia Garcia', avatar: 'OG', xp: 10200, streak: 22, solved: 195, rank: 10 },
-];
-
-const currentUserRank = 42;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 export function Leaderboard() {
   const { profile } = useAuth();
   const [timeRange, setTimeRange] = useState<'all' | 'month' | 'week'>('all');
   const [category, setCategory] = useState<'xp' | 'streak' | 'solved'>('xp');
+  const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const sortedData = [...leaderboardData].sort((a, b) => {
-    if (category === 'xp') return b.xp - a.xp;
-    if (category === 'streak') return b.streak - a.streak;
-    return b.solved - a.solved;
-  });
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/users/leaderboard?sortBy=${category}&limit=10`);
+        if (res.ok) {
+          const data = await res.json();
+          setLeaderboardData(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch leaderboard', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, [category]);
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Crown className="w-6 h-6 text-[#ffd700]" />;
@@ -43,6 +44,14 @@ export function Leaderboard() {
     if (rank === 3) return <Medal className="w-6 h-6 text-[#cd7f32]" />;
     return <span className="w-6 h-6 flex items-center justify-center text-white/60 font-medium">{rank}</span>;
   };
+
+  if (loading) {
+    return (
+      <section className="relative min-h-screen pt-24 pb-12 overflow-hidden flex items-center justify-center">
+        <div className="text-white">Loading Leaderboard...</div>
+      </section>
+    )
+  }
 
   return (
     <section className="relative min-h-screen pt-24 pb-12 overflow-hidden">
@@ -83,11 +92,10 @@ export function Leaderboard() {
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  timeRange === range
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${timeRange === range
                     ? 'bg-white/10 text-white'
                     : 'text-white/60 hover:text-white'
-                }`}
+                  }`}
               >
                 {range === 'all' ? 'All Time' : range === 'month' ? 'This Month' : 'This Week'}
               </button>
@@ -104,11 +112,10 @@ export function Leaderboard() {
               <button
                 key={cat.id}
                 onClick={() => setCategory(cat.id as typeof category)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  category === cat.id
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${category === cat.id
                     ? 'bg-gradient-to-r from-[#a088ff] to-[#63e3ff] text-[#141414]'
                     : 'bg-white/5 text-white/60 hover:bg-white/10'
-                }`}
+                  }`}
               >
                 <cat.icon className="w-4 h-4" />
                 {cat.label}
@@ -118,48 +125,56 @@ export function Leaderboard() {
         </motion.div>
 
         {/* Top 3 Podium */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex items-end justify-center gap-4 mb-12"
-        >
-          {/* 2nd Place */}
-          <div className="flex flex-col items-center">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#c0c0c0]/30 to-[#c0c0c0]/10 flex items-center justify-center mb-3 border-2 border-[#c0c0c0]/50">
-              <span className="text-2xl font-bold text-[#c0c0c0]">{sortedData[1].avatar}</span>
-            </div>
-            <p className="text-white font-medium text-sm mb-1">{sortedData[1].name}</p>
-            <p className="text-[#c0c0c0] text-xs">{sortedData[1].xp.toLocaleString()} XP</p>
-            <div className="w-24 h-24 mt-3 rounded-t-xl bg-gradient-to-t from-[#c0c0c0]/20 to-transparent flex items-end justify-center pb-2">
-              <Medal className="w-8 h-8 text-[#c0c0c0]" />
-            </div>
-          </div>
+        {leaderboardData.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="flex items-end justify-center gap-4 mb-12"
+          >
+            {/* 2nd Place */}
+            {leaderboardData[1] && (
+              <div className="flex flex-col items-center">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#c0c0c0]/30 to-[#c0c0c0]/10 flex items-center justify-center mb-3 border-2 border-[#c0c0c0]/50">
+                  <span className="text-2xl font-bold text-[#c0c0c0]">{leaderboardData[1].avatar}</span>
+                </div>
+                <p className="text-white font-medium text-sm mb-1">{leaderboardData[1].name}</p>
+                <p className="text-[#c0c0c0] text-xs">{leaderboardData[1].xp.toLocaleString()} XP</p>
+                <div className="w-24 h-24 mt-3 rounded-t-xl bg-gradient-to-t from-[#c0c0c0]/20 to-transparent flex items-end justify-center pb-2">
+                  <Medal className="w-8 h-8 text-[#c0c0c0]" />
+                </div>
+              </div>
+            )}
 
-          {/* 1st Place */}
-          <div className="flex flex-col items-center -mt-8">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#ffd700]/30 to-[#ffd700]/10 flex items-center justify-center mb-3 border-2 border-[#ffd700]/50 animate-pulse-glow">
-              <span className="text-3xl font-bold text-[#ffd700]">{sortedData[0].avatar}</span>
-            </div>
-            <p className="text-white font-medium mb-1">{sortedData[0].name}</p>
-            <p className="text-[#ffd700] text-sm">{sortedData[0].xp.toLocaleString()} XP</p>
-            <div className="w-28 h-32 mt-3 rounded-t-xl bg-gradient-to-t from-[#ffd700]/20 to-transparent flex items-end justify-center pb-2">
-              <Crown className="w-10 h-10 text-[#ffd700]" />
-            </div>
-          </div>
+            {/* 1st Place */}
+            {leaderboardData[0] && (
+              <div className="flex flex-col items-center -mt-8">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#ffd700]/30 to-[#ffd700]/10 flex items-center justify-center mb-3 border-2 border-[#ffd700]/50 animate-pulse-glow">
+                  <span className="text-3xl font-bold text-[#ffd700]">{leaderboardData[0].avatar}</span>
+                </div>
+                <p className="text-white font-medium mb-1">{leaderboardData[0].name}</p>
+                <p className="text-[#ffd700] text-sm">{leaderboardData[0].xp.toLocaleString()} XP</p>
+                <div className="w-28 h-32 mt-3 rounded-t-xl bg-gradient-to-t from-[#ffd700]/20 to-transparent flex items-end justify-center pb-2">
+                  <Crown className="w-10 h-10 text-[#ffd700]" />
+                </div>
+              </div>
+            )}
 
-          {/* 3rd Place */}
-          <div className="flex flex-col items-center">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#cd7f32]/30 to-[#cd7f32]/10 flex items-center justify-center mb-3 border-2 border-[#cd7f32]/50">
-              <span className="text-2xl font-bold text-[#cd7f32]">{sortedData[2].avatar}</span>
-            </div>
-            <p className="text-white font-medium text-sm mb-1">{sortedData[2].name}</p>
-            <p className="text-[#cd7f32] text-xs">{sortedData[2].xp.toLocaleString()} XP</p>
-            <div className="w-24 h-16 mt-3 rounded-t-xl bg-gradient-to-t from-[#cd7f32]/20 to-transparent flex items-end justify-center pb-2">
-              <Medal className="w-8 h-8 text-[#cd7f32]" />
-            </div>
-          </div>
-        </motion.div>
+            {/* 3rd Place */}
+            {leaderboardData[2] && (
+              <div className="flex flex-col items-center">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#cd7f32]/30 to-[#cd7f32]/10 flex items-center justify-center mb-3 border-2 border-[#cd7f32]/50">
+                  <span className="text-2xl font-bold text-[#cd7f32]">{leaderboardData[2].avatar}</span>
+                </div>
+                <p className="text-white font-medium text-sm mb-1">{leaderboardData[2].name}</p>
+                <p className="text-[#cd7f32] text-xs">{leaderboardData[2].xp.toLocaleString()} XP</p>
+                <div className="w-24 h-16 mt-3 rounded-t-xl bg-gradient-to-t from-[#cd7f32]/20 to-transparent flex items-end justify-center pb-2">
+                  <Medal className="w-8 h-8 text-[#cd7f32]" />
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {/* Leaderboard List */}
         <motion.div
@@ -168,7 +183,7 @@ export function Leaderboard() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="space-y-2"
         >
-          {sortedData.slice(3).map((user, index) => (
+          {leaderboardData.slice(3).map((user, index) => (
             <motion.div
               key={user.id}
               initial={{ opacity: 0, x: -20 }}
@@ -210,42 +225,44 @@ export function Leaderboard() {
           ))}
         </motion.div>
 
-        {/* Current User Rank */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-6 glass rounded-xl p-4 gradient-border"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-8 flex justify-center">
-              <span className="text-white/60 font-medium">#{currentUserRank}</span>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#a088ff] to-[#63e3ff] flex items-center justify-center">
-              <span className="text-sm font-medium text-[#141414]">
-                {profile?.name?.charAt(0).toUpperCase() || 'Y'}
-              </span>
-            </div>
-            <div className="flex-1">
-              <p className="text-white font-medium">You</p>
-              <p className="text-white/40 text-sm">Keep pushing! You're in the top 5%</p>
-            </div>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 text-sm">
-                <Zap className="w-4 h-4 text-[#a088ff]" />
-                <span className="text-white/80">2,350</span>
+        {/* Current User Rank - TODO: Implement finding user rank from backend */}
+        {profile && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="mt-6 glass rounded-xl p-4 gradient-border"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-8 flex justify-center">
+                <span className="text-white/60 font-medium">#?</span>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Flame className="w-4 h-4 text-[#ff8a63]" />
-                <span className="text-white/80">7</span>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#a088ff] to-[#63e3ff] flex items-center justify-center">
+                <span className="text-sm font-medium text-[#141414]">
+                  {profile.name?.charAt(0).toUpperCase() || 'Y'}
+                </span>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Target className="w-4 h-4 text-[#63e3ff]" />
-                <span className="text-white/80">47</span>
+              <div className="flex-1">
+                <p className="text-white font-medium">You</p>
+                <p className="text-white/40 text-sm">Keep pushing to climb!</p>
+              </div>
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2 text-sm">
+                  <Zap className="w-4 h-4 text-[#a088ff]" />
+                  <span className="text-white/80">{profile.xp_points || 0}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Flame className="w-4 h-4 text-[#ff8a63]" />
+                  <span className="text-white/80">{profile.streak_days || 0}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Target className="w-4 h-4 text-[#63e3ff]" />
+                  <span className="text-white/80">{profile.solvedProblems?.length || 0}</span>
+                </div>
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* Motivation */}
         <motion.div

@@ -22,7 +22,10 @@ connectDB();
 
 // Routes
 import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
+
 app.use('/api/users', authRoutes);
+app.use('/api/users', userRoutes);
 
 import infoRoutes from './routes/infoRoutes';
 app.use('/api/info', infoRoutes);
