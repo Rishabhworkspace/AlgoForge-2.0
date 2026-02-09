@@ -233,6 +233,139 @@ export const topics: Topic[] = [
     icon: 'Navigation',
     color: '#88ff9f',
     total_problems: 12
+  },
+  // Algorithms
+  {
+    id: 'sorting',
+    title: 'Sorting Algorithms',
+    category: 'algorithms',
+    description: 'Master bubble, selection, insertion, merge, and quick sort',
+    order_index: 1,
+    icon: 'ArrowUpDown',
+    color: '#63e3ff',
+    total_problems: 15
+  },
+  {
+    id: 'searching',
+    title: 'Searching Algorithms',
+    category: 'algorithms',
+    description: 'Linear search, binary search, and their variations',
+    order_index: 2,
+    icon: 'Search',
+    color: '#63e3ff',
+    total_problems: 12
+  },
+  {
+    id: 'two-pointers',
+    title: 'Two Pointers',
+    category: 'algorithms',
+    description: 'Solve array and string problems efficiently',
+    order_index: 3,
+    icon: 'MousePointer2',
+    color: '#63e3ff',
+    total_problems: 20
+  },
+  {
+    id: 'sliding-window',
+    title: 'Sliding Window',
+    category: 'algorithms',
+    description: 'Optimize subarray and substring problems',
+    order_index: 4,
+    icon: 'Maximize',
+    color: '#63e3ff',
+    total_problems: 18
+  },
+  {
+    id: 'greedy',
+    title: 'Greedy Algorithms',
+    category: 'algorithms',
+    description: 'Make locally optimal choices for global optimum',
+    order_index: 5,
+    icon: 'Zap',
+    color: '#63e3ff',
+    total_problems: 25
+  },
+  // Interview Preparation
+  {
+    id: 'arrays-interview',
+    title: 'Top Array Questions',
+    category: 'interview',
+    description: 'Most asked array interview questions',
+    order_index: 1,
+    icon: 'List',
+    color: '#ff88c9',
+    total_problems: 30
+  },
+  {
+    id: 'trees-interview',
+    title: 'Top Tree Questions',
+    category: 'interview',
+    description: 'Essential tree problems for interviews',
+    order_index: 2,
+    icon: 'TreePine',
+    color: '#ff88c9',
+    total_problems: 25
+  },
+  {
+    id: 'dp-interview',
+    title: 'DP Must-Dos',
+    category: 'interview',
+    description: 'Common dynamic programming patterns',
+    order_index: 3,
+    icon: 'BrainCircuit',
+    color: '#ff88c9',
+    total_problems: 20
+  },
+  {
+    id: 'system-design-basic',
+    title: 'System Design 101',
+    category: 'interview',
+    description: 'Basics of system design for freshers',
+    order_index: 4,
+    icon: 'Server',
+    color: '#ff88c9',
+    total_problems: 10
+  },
+  // System Design
+  {
+    id: 'system-design-basics',
+    title: 'Design Fundamentals',
+    category: 'system-design',
+    description: 'CAP theorem, ACID properties, and more',
+    order_index: 1,
+    icon: 'Book',
+    color: '#ffd700',
+    total_problems: 15
+  },
+  {
+    id: 'load-balancing',
+    title: 'Load Balancing',
+    category: 'system-design',
+    description: 'Scaling applications with load balancers',
+    order_index: 2,
+    icon: 'Scale',
+    color: '#ffd700',
+    total_problems: 8
+  },
+  {
+    id: 'caching',
+    title: 'Caching Strategies',
+    category: 'system-design',
+    description: 'Redis, Memcached, and caching patterns',
+    order_index: 3,
+    icon: 'Zap',
+    color: '#ffd700',
+    total_problems: 10
+  },
+  {
+    id: 'database-design',
+    title: 'Database Design',
+    category: 'system-design',
+    description: 'SQL vs NoSQL, sharding, and replication',
+    order_index: 4,
+    icon: 'Database',
+    color: '#ffd700',
+    total_problems: 12
   }
 ];
 
@@ -505,6 +638,620 @@ export const problems: Problem[] = [
     tags: ['Graph', 'DFS', 'BFS', 'Heap'],
     description: 'Find the time for all nodes to receive a signal.',
     order_index: 1
+  },
+  // Algorithms - Sorting
+  {
+    id: 'algo-sort-1',
+    topic_id: 'sorting',
+    title: 'Merge Sort Implementation',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['Sorting', 'Divide and Conquer'],
+    description: 'Implement Merge Sort from scratch.',
+    order_index: 1
+  },
+  {
+    id: 'algo-sort-2',
+    topic_id: 'sorting',
+    title: 'Quick Sort Implementation',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['Sorting', 'Divide and Conquer'],
+    description: 'Implement Quick Sort from scratch.',
+    order_index: 2
+  },
+  {
+    id: 'algo-sort-3',
+    topic_id: 'sorting',
+    title: 'Heap Sort Implementation',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['Sorting', 'Heap'],
+    description: 'Implement Heap Sort from scratch.',
+    order_index: 3
+  },
+  {
+    id: 'algo-greedy-1',
+    topic_id: 'greedy',
+    title: 'Activity Selection Problem',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['Greedy'],
+    description: 'Select maximum number of activities to perform.',
+    order_index: 1
+  },
+  {
+    id: 'algo-greedy-2',
+    topic_id: 'greedy',
+    title: 'Huffman Coding',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['Greedy'],
+    description: 'Implement Huffman Coding compression algorithm.',
+    order_index: 2
+  },
+  {
+    id: 'algo-sliding-1',
+    topic_id: 'sliding-window',
+    title: 'Longest Substring Without Repeating Characters',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/longest-substring-without-repeating-characters/',
+    problem_link: 'https://leetcode.com/problems/longest-substring-without-repeating-characters/',
+    tags: ['Sliding Window', 'String'],
+    description: 'Find length of longest substring with unique characters.',
+    order_index: 1
+  },
+  {
+    id: 'algo-2ptr-1',
+    topic_id: 'two-pointers',
+    title: 'Container With Most Water',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/container-with-most-water/',
+    problem_link: 'https://leetcode.com/problems/container-with-most-water/',
+    tags: ['Two Pointers', 'Array'],
+    description: 'Find two lines that together with x-axis form a container holding most water.',
+    order_index: 1
+  },
+  // Algorithms - Searching
+  {
+    id: 'algo-search-1',
+    topic_id: 'searching',
+    title: 'Binary Search',
+    difficulty: 'Easy',
+    video_link: 'https://leetcode.com/problems/binary-search/',
+    problem_link: 'https://leetcode.com/problems/binary-search/',
+    tags: ['Binary Search', 'Array'],
+    description: 'Implement binary search on a sorted array.',
+    order_index: 1
+  },
+  {
+    id: 'algo-search-2',
+    topic_id: 'searching',
+    title: 'Search in Rotated Sorted Array',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/search-in-rotated-sorted-array/',
+    problem_link: 'https://leetcode.com/problems/search-in-rotated-sorted-array/',
+    tags: ['Binary Search', 'Array'],
+    description: 'Search for a target value in a rotated sorted array.',
+    order_index: 2
+  },
+  // Interview Prep
+  {
+    id: 'int-arr-1',
+    topic_id: 'arrays-interview',
+    title: 'Rotate Image',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/rotate-image/',
+    problem_link: 'https://leetcode.com/problems/rotate-image/',
+    tags: ['Array', 'Matrix'],
+    description: 'Rotate a 2D matrix by 90 degrees.',
+    order_index: 1
+  },
+  {
+    id: 'int-arr-2',
+    topic_id: 'arrays-interview',
+    title: 'Spiral Matrix',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/spiral-matrix/',
+    problem_link: 'https://leetcode.com/problems/spiral-matrix/',
+    tags: ['Array', 'Matrix'],
+    description: 'Return all elements of the matrix in spiral order.',
+    order_index: 2
+  },
+  {
+    id: 'int-tree-1',
+    topic_id: 'trees-interview',
+    title: 'Lowest Common Ancestor of a Binary Tree',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/',
+    problem_link: 'https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/',
+    tags: ['Tree', 'DFS'],
+    description: 'Find LCA of two nodes in a binary tree.',
+    order_index: 1
+  },
+  {
+    id: 'int-dp-1',
+    topic_id: 'dp-interview',
+    title: 'Longest Palindromic Substring',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/longest-palindromic-substring/',
+    problem_link: 'https://leetcode.com/problems/longest-palindromic-substring/',
+    tags: ['String', 'DP'],
+    description: 'Find the longest palindromic substring in s.',
+    order_index: 1
+  },
+  // System Design
+  {
+    id: 'sys-basics-1',
+    topic_id: 'system-design-basics',
+    title: 'CAP Theorem',
+    difficulty: 'Easy',
+    video_link: null,
+    problem_link: null,
+    tags: ['System Design', 'Theory'],
+    description: 'Explain the CAP theorem with examples.',
+    order_index: 1
+  },
+  {
+    id: 'sys-load-1',
+    topic_id: 'load-balancing',
+    title: 'Load Balancer Algorithms',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['System Design', 'Load Balancing'],
+    description: 'Round Robin, Least Connections, IP Hash.',
+    order_index: 1
+  },
+  {
+    id: 'sys-cache-1',
+    topic_id: 'caching',
+    title: 'Cache Eviction Policies',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['System Design', 'Caching'],
+    description: 'LRU, LFU, FIFO eviction policies.',
+    order_index: 1
+  },
+  {
+    id: 'sys-db-1',
+    topic_id: 'database-design',
+    title: 'SQL vs NoSQL',
+    difficulty: 'Easy',
+    video_link: null,
+    problem_link: null,
+    tags: ['System Design', 'Database'],
+    description: 'When to choose SQL vs NoSQL databases.',
+    order_index: 1
+  },
+  // DSA - Additional
+  {
+    id: 'dsa-stack-1',
+    topic_id: 'stacks-queues',
+    title: 'Valid Parentheses',
+    difficulty: 'Easy',
+    video_link: 'https://leetcode.com/problems/valid-parentheses/',
+    problem_link: 'https://leetcode.com/problems/valid-parentheses/',
+    tags: ['Stack', 'String'],
+    description: 'Determine if the input string has valid parentheses.',
+    order_index: 1
+  },
+  {
+    id: 'dsa-heap-1',
+    topic_id: 'heaps',
+    title: 'Kth Largest Element in an Array',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/kth-largest-element-in-an-array/',
+    problem_link: 'https://leetcode.com/problems/kth-largest-element-in-an-array/',
+    tags: ['Heap', 'Sorting'],
+    description: 'Find the kth largest element in an unsorted array.',
+    order_index: 1
+  },
+  // DP - Additional
+  {
+    id: 'dp-lis',
+    topic_id: 'dp-1d',
+    title: 'Longest Increasing Subsequence',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/longest-increasing-subsequence/',
+    problem_link: 'https://leetcode.com/problems/longest-increasing-subsequence/',
+    tags: ['DP'],
+    description: 'Find length of LIS.',
+    order_index: 3
+  },
+  {
+    id: 'dp-lcs',
+    topic_id: 'dp-2d',
+    title: 'Longest Common Subsequence',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/longest-common-subsequence/',
+    problem_link: 'https://leetcode.com/problems/longest-common-subsequence/',
+    tags: ['DP'],
+    description: 'Find length of LCS of two strings.',
+    order_index: 2
+  },
+  // Graphs - Additional
+  {
+    id: 'graph-mst-1',
+    topic_id: 'shortest-path',
+    title: 'Min Cost to Connect All Points',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/min-cost-to-connect-all-points/',
+    problem_link: 'https://leetcode.com/problems/min-cost-to-connect-all-points/',
+    tags: ['Graph', 'MST'],
+    description: 'Minimum spanning tree using Prims or Kruskals.',
+    order_index: 2
+  },
+  {
+    id: 'graph-topo-1',
+    topic_id: 'bfs-dfs',
+    title: 'Course Schedule II',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/course-schedule-ii/',
+    problem_link: 'https://leetcode.com/problems/course-schedule-ii/',
+    tags: ['Graph', 'Topological Sort'],
+    description: 'Find order to finish all courses.',
+    order_index: 4
+  },
+  // --- ADDITIONAL BATCH FOR BULKING UP ---
+  // Algorithms - More Sorting/Searching
+  {
+    id: 'algo-sort-4',
+    topic_id: 'sorting',
+    title: 'Sort Colors',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/sort-colors/',
+    problem_link: 'https://leetcode.com/problems/sort-colors/',
+    tags: ['Sorting', 'Array', 'Two Pointers'],
+    description: 'Sort an array of 0s, 1s, and 2s in-place.',
+    order_index: 4
+  },
+  {
+    id: 'algo-search-3',
+    topic_id: 'searching',
+    title: 'Find First and Last Position',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/',
+    problem_link: 'https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/',
+    tags: ['Binary Search', 'Array'],
+    description: 'Find start and end position of target in sorted array.',
+    order_index: 3
+  },
+  // Algorithms - More Greedy
+  {
+    id: 'algo-greedy-3',
+    topic_id: 'greedy',
+    title: 'Jump Game',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/jump-game/',
+    problem_link: 'https://leetcode.com/problems/jump-game/',
+    tags: ['Greedy', 'Array', 'DP'],
+    description: 'Determine if you can reach the last index.',
+    order_index: 3
+  },
+  {
+    id: 'algo-greedy-4',
+    topic_id: 'greedy',
+    title: 'Gas Station',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/gas-station/',
+    problem_link: 'https://leetcode.com/problems/gas-station/',
+    tags: ['Greedy', 'Array'],
+    description: 'Return starting gas station index to travel around circuit.',
+    order_index: 4
+  },
+  // Interview Prep - More Core patterns
+  {
+    id: 'int-arr-3',
+    topic_id: 'arrays-interview',
+    title: 'Merge Intervals',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/merge-intervals/',
+    problem_link: 'https://leetcode.com/problems/merge-intervals/',
+    tags: ['Array', 'Sorting'],
+    description: 'Merge all overlapping intervals.',
+    order_index: 3
+  },
+  {
+    id: 'int-arr-4',
+    topic_id: 'arrays-interview',
+    title: 'Trapping Rain Water',
+    difficulty: 'Hard',
+    video_link: 'https://leetcode.com/problems/trapping-rain-water/',
+    problem_link: 'https://leetcode.com/problems/trapping-rain-water/',
+    tags: ['Array', 'Two Pointers'],
+    description: 'Compute how much water can be trapped after raining.',
+    order_index: 4
+  },
+  {
+    id: 'int-tree-2',
+    topic_id: 'trees-interview',
+    title: 'Serialize and Deserialize Binary Tree',
+    difficulty: 'Hard',
+    video_link: 'https://leetcode.com/problems/serialize-and-deserialize-binary-tree/',
+    problem_link: 'https://leetcode.com/problems/serialize-and-deserialize-binary-tree/',
+    tags: ['Tree', 'Design'],
+    description: 'Design an algorithm to serialize and deserialize a binary tree.',
+    order_index: 2
+  },
+  {
+    id: 'int-tree-3',
+    topic_id: 'trees-interview',
+    title: 'Diameter of Binary Tree',
+    difficulty: 'Easy',
+    video_link: 'https://leetcode.com/problems/diameter-of-binary-tree/',
+    problem_link: 'https://leetcode.com/problems/diameter-of-binary-tree/',
+    tags: ['Tree', 'DFS'],
+    description: 'Length of longest path between any two nodes in a tree.',
+    order_index: 3
+  },
+  {
+    id: 'int-dp-2',
+    topic_id: 'dp-interview',
+    title: 'Word Break',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/word-break/',
+    problem_link: 'https://leetcode.com/problems/word-break/',
+    tags: ['DP', 'Trie'],
+    description: 'Determine if string can be segmented into dictionary words.',
+    order_index: 2
+  },
+  {
+    id: 'int-dp-3',
+    topic_id: 'dp-interview',
+    title: 'Edit Distance',
+    difficulty: 'Hard',
+    video_link: 'https://leetcode.com/problems/edit-distance/',
+    problem_link: 'https://leetcode.com/problems/edit-distance/',
+    tags: ['DP', 'String'],
+    description: 'Find minimum operations to convert word1 to word2.',
+    order_index: 3
+  },
+  // System Design - More Scenarios
+  {
+    id: 'sys-des-1',
+    topic_id: 'system-design-basics',
+    title: 'Consistent Hashing',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['System Design', 'Scaling'],
+    description: 'Distribute data across nodes to minimize reorganization.',
+    order_index: 2
+  },
+  {
+    id: 'sys-des-2',
+    topic_id: 'system-design-basics',
+    title: 'Rate Limiter Design',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['System Design', 'API'],
+    description: 'Design an API rate limiter (Token Bucket, Leaky Bucket).',
+    order_index: 3
+  },
+  {
+    id: 'sys-des-3',
+    topic_id: 'system-design-basics',
+    title: 'Design URL Shortener',
+    difficulty: 'Easy',
+    video_link: null,
+    problem_link: null,
+    tags: ['System Design', 'System'],
+    description: 'Design a system like TinyURL.',
+    order_index: 4
+  },
+  {
+    id: 'sys-des-4',
+    topic_id: 'database-design',
+    title: 'Database Sharding',
+    difficulty: 'Hard',
+    video_link: null,
+    problem_link: null,
+    tags: ['System Design', 'Database'],
+    description: 'Horizontal partitioning strategies and challenges.',
+    order_index: 2
+  },
+  {
+    id: 'sys-des-5',
+    topic_id: 'caching',
+    title: 'Redis vs Memcached',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['System Design', 'Caching'],
+    description: 'Compare two popular caching solutions.',
+    order_index: 2
+  },
+  {
+    id: 'sys-des-6',
+    topic_id: 'load-balancing',
+    title: 'L4 vs L7 Load Balancing',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['System Design', 'Networking'],
+    description: 'Transport layer vs Application layer load balancing.',
+    order_index: 2
+  },
+  // --- FINAL BATCH TO FILL GAPS ---
+  // DP - Introduction
+  {
+    id: 'dp-intro-3',
+    topic_id: 'dp-introduction',
+    title: 'Min Cost Climbing Stairs',
+    difficulty: 'Easy',
+    video_link: 'https://leetcode.com/problems/min-cost-climbing-stairs/',
+    problem_link: 'https://leetcode.com/problems/min-cost-climbing-stairs/',
+    tags: ['DP'],
+    description: 'Minimum cost to reach the top of the floor.',
+    order_index: 3
+  },
+  {
+    id: 'dp-intro-4',
+    topic_id: 'dp-introduction',
+    title: 'N-th Tribonacci Number',
+    difficulty: 'Easy',
+    video_link: 'https://leetcode.com/problems/n-th-tribonacci-number/',
+    problem_link: 'https://leetcode.com/problems/n-th-tribonacci-number/',
+    tags: ['DP'],
+    description: 'Calculate the N-th Tribonacci number.',
+    order_index: 4
+  },
+  // DP - 1D
+  {
+    id: 'dp-1d-4',
+    topic_id: 'dp-1d',
+    title: 'Decode Ways',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/decode-ways/',
+    problem_link: 'https://leetcode.com/problems/decode-ways/',
+    tags: ['DP', 'String'],
+    description: 'Count ways to decode a string of digits.',
+    order_index: 4
+  },
+  {
+    id: 'dp-1d-5',
+    topic_id: 'dp-1d',
+    title: 'Partition Equal Subset Sum',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/partition-equal-subset-sum/',
+    problem_link: 'https://leetcode.com/problems/partition-equal-subset-sum/',
+    tags: ['DP'],
+    description: 'Determine if array can be partitioned into two subsets with equal sum.',
+    order_index: 5
+  },
+  // DP - 2D
+  {
+    id: 'dp-2d-3',
+    topic_id: 'dp-2d',
+    title: 'Minimum Path Sum',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/minimum-path-sum/',
+    problem_link: 'https://leetcode.com/problems/minimum-path-sum/',
+    tags: ['DP', 'Matrix'],
+    description: 'Find a path from top left to bottom right which minimizes the sum.',
+    order_index: 3
+  },
+  {
+    id: 'dp-2d-4',
+    topic_id: 'dp-2d',
+    title: 'Target Sum',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/target-sum/',
+    problem_link: 'https://leetcode.com/problems/target-sum/',
+    tags: ['DP', 'Backtracking'],
+    description: 'Number of ways to assign symbols to make sum equal to target.',
+    order_index: 4
+  },
+  // Graph Basics
+  {
+    id: 'graph-basic-1',
+    topic_id: 'graph-basics',
+    title: 'Find the Town Judge',
+    difficulty: 'Easy',
+    video_link: 'https://leetcode.com/problems/find-the-town-judge/',
+    problem_link: 'https://leetcode.com/problems/find-the-town-judge/',
+    tags: ['Graph'],
+    description: 'Find the person trusted by everyone.',
+    order_index: 1
+  },
+  {
+    id: 'graph-basic-2',
+    topic_id: 'graph-basics',
+    title: 'Find Center of Star Graph',
+    difficulty: 'Easy',
+    video_link: 'https://leetcode.com/problems/find-center-of-star-graph/',
+    problem_link: 'https://leetcode.com/problems/find-center-of-star-graph/',
+    tags: ['Graph'],
+    description: 'Return the center node of a star graph.',
+    order_index: 2
+  },
+  // Shortest Path
+  {
+    id: 'graph-sp-3',
+    topic_id: 'shortest-path',
+    title: 'Cheapest Flights Within K Stops',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/cheapest-flights-within-k-stops/',
+    problem_link: 'https://leetcode.com/problems/cheapest-flights-within-k-stops/',
+    tags: ['Graph', 'Bellman-Ford', 'Dijkstra'],
+    description: 'Find cheapest flight price with at most K stops.',
+    order_index: 3
+  },
+  {
+    id: 'graph-sp-4',
+    topic_id: 'shortest-path',
+    title: 'Path with Maximum Probability',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/path-with-maximum-probability/',
+    problem_link: 'https://leetcode.com/problems/path-with-maximum-probability/',
+    tags: ['Graph', 'Dijkstra'],
+    description: 'Find path with maximum probability of success.',
+    order_index: 4
+  },
+  // BFS/DFS
+  {
+    id: 'graph-bfs-5',
+    topic_id: 'bfs-dfs',
+    title: 'Rotting Oranges',
+    difficulty: 'Medium',
+    video_link: 'https://leetcode.com/problems/rotting-oranges/',
+    problem_link: 'https://leetcode.com/problems/rotting-oranges/',
+    tags: ['BFS', 'Matrix'],
+    description: 'Minimum minutes until no fresh orange remains.',
+    order_index: 5
+  },
+  {
+    id: 'graph-bfs-6',
+    topic_id: 'bfs-dfs',
+    title: 'Word Ladder',
+    difficulty: 'Hard',
+    video_link: 'https://leetcode.com/problems/word-ladder/',
+    problem_link: 'https://leetcode.com/problems/word-ladder/',
+    tags: ['BFS', 'Hash Table'],
+    description: 'Shortest transformation sequence from beginWord to endWord.',
+    order_index: 6
+  },
+  // System Design - More
+  {
+    id: 'sys-more-1',
+    topic_id: 'system-design-basics',
+    title: 'CDN (Content Delivery Network)',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['System Design', 'Caching'],
+    description: 'How CDNs work and when to use them.',
+    order_index: 4
+  },
+  {
+    id: 'sys-more-2',
+    topic_id: 'system-design-basics',
+    title: 'Message Queues',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['System Design', 'Async'],
+    description: 'Kafka, RabbitMQ, and async processing.',
+    order_index: 5
+  },
+  {
+    id: 'sys-more-3',
+    topic_id: 'database-design',
+    title: 'Database Indexing',
+    difficulty: 'Medium',
+    video_link: null,
+    problem_link: null,
+    tags: ['Database', 'Optimization'],
+    description: 'B-Trees, LSM Trees, and index types.',
+    order_index: 3
   }
 ];
 
