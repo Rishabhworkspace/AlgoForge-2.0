@@ -4,7 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Users, Star, Sparkles, Terminal, Cpu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { problems } from '@/data/roadmaps';
-import { toast } from 'sonner';
+
 
 interface HeroProps {
   onGetStarted: () => void;
