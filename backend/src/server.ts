@@ -24,6 +24,9 @@ connectDB();
 import authRoutes from './routes/authRoutes';
 app.use('/api/users', authRoutes);
 
+import infoRoutes from './routes/infoRoutes';
+app.use('/api/info', infoRoutes);
+
 app.get('/', (req: Request, res: Response) => {
     res.send('AlgoForge API is running');
 });

@@ -4,10 +4,8 @@ import {
   Github,
   Twitter,
   Linkedin,
-  Youtube,
   Mail,
-  MapPin,
-  Phone
+  MapPin
 } from 'lucide-react';
 
 // Footer component - onNavigate prop reserved for future use
@@ -23,19 +21,12 @@ const footerLinks = {
     { label: 'Roadmaps', href: '#roadmaps' },
     { label: 'Problems', href: '#problems' },
     { label: 'Leaderboard', href: '#leaderboard' },
-    { label: 'Pricing', href: '#' },
   ],
   resources: [
     { label: 'Documentation', href: '#' },
     { label: 'API Reference', href: '#' },
     { label: 'Community', href: '#' },
     { label: 'Blog', href: '#' },
-  ],
-  company: [
-    { label: 'About Us', href: '#' },
-    { label: 'Careers', href: '#' },
-    { label: 'Contact', href: '#' },
-    { label: 'Press Kit', href: '#' },
   ],
   legal: [
     { label: 'Privacy Policy', href: '#' },
@@ -45,10 +36,9 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Github, href: '#', label: 'GitHub' },
-  { icon: Twitter, href: '#', label: 'Twitter' },
-  { icon: Linkedin, href: '#', label: 'LinkedIn' },
-  { icon: Youtube, href: '#', label: 'YouTube' },
+  { icon: Github, href: 'https://github.com/Rishabhworkspace/AlgoForge-2.0', label: 'GitHub' },
+  { icon: Linkedin, href: 'https://www.linkedin.com/in/rishabh-tripathi-728a77317', label: 'LinkedIn' },
+  { icon: Twitter, href: 'https://x.com/RishabhTri8805', label: 'Twitter' },
 ];
 
 export function Footer({ onNavigate }: FooterProps) {
@@ -117,7 +107,13 @@ export function Footer({ onNavigate }: FooterProps) {
                     onClick={(e) => {
                       if (link.label === 'Roadmaps') {
                         e.preventDefault();
-                        handleNavClick('home');
+                        handleNavClick('topic');
+                      } else if (link.label === 'Problems') {
+                        e.preventDefault();
+                        handleNavClick('problems');
+                      } else if (link.label === 'Leaderboard') {
+                        e.preventDefault();
+                        handleNavClick('leaderboard');
                       }
                     }}
                     className="text-sm text-white/60 hover:text-white transition-colors"
@@ -151,27 +147,7 @@ export function Footer({ onNavigate }: FooterProps) {
             </ul>
           </motion.div>
 
-          {/* Company Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <h4 className="font-semibold text-white mb-4">Company</h4>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-white/60 hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+
 
           {/* Contact Info */}
           <motion.div
@@ -184,15 +160,11 @@ export function Footer({ onNavigate }: FooterProps) {
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-sm text-white/60">
                 <Mail className="w-4 h-4" />
-                hello@algoforge.io
-              </li>
-              <li className="flex items-center gap-2 text-sm text-white/60">
-                <Phone className="w-4 h-4" />
-                +1 (555) 123-4567
+                rishabh.j.tripathi2903@gmail.com
               </li>
               <li className="flex items-start gap-2 text-sm text-white/60">
                 <MapPin className="w-4 h-4 mt-0.5" />
-                San Francisco, CA
+                Chennai, Tamil Nadu
               </li>
             </ul>
           </motion.div>

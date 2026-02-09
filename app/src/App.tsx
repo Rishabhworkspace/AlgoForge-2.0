@@ -29,23 +29,55 @@ function AppContent() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
-    // Check for hash-based navigation
-    const hash = window.location.hash.slice(1);
-    if (hash) {
-      if (hash.startsWith('topic/')) {
-        const topicId = hash.replace('topic/', '');
-        setSelectedTopicId(topicId);
-        setCurrentView('topic');
-      } else if (hash === 'dashboard' && user) {
-        setCurrentView('dashboard');
-      } else if (hash === 'problems') {
-        setCurrentView('problems');
-      } else if (hash === 'notes' && user) {
-        setCurrentView('notes');
-      } else if (hash === 'leaderboard') {
-        setCurrentView('leaderboard');
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+
+      if (hash) {
+        if (hash.startsWith('topic/')) {
+          const topicId = hash.replace('topic/', '');
+          setSelectedTopicId(topicId);
+          setCurrentView('topic');
+        } else if (hash === 'dashboard') {
+          if (user) {
+            setCurrentView('dashboard');
+          } else {
+            // If trying to access protected route without user, maybe redirect or show login? 
+            // For now, let's just stay on home or current view, or ideally redirect to home.
+            // But the original logic just checked `&& user`. 
+            // Let's keep it simple: if user is not there, we don't switch to dashboard.
+            // But wait, if they click back to dashboard from a public page, and they are not logged in, they shouldn't go there.
+            window.location.hash = ''; // Clear hash if unauthorized?
+            setCurrentView('home');
+          }
+        } else if (hash === 'problems') {
+          setCurrentView('problems');
+        } else if (hash === 'notes') {
+          if (user) {
+            setCurrentView('notes');
+          } else {
+            window.location.hash = '';
+            setCurrentView('home');
+          }
+        } else if (hash === 'leaderboard') {
+          setCurrentView('leaderboard');
+        } else {
+          // Unknown hash, or standard view mapping
+          // e.g. #home -> home
+          setCurrentView('home');
+        }
+      } else {
+        // No hash -> Home
+        setCurrentView('home');
+        setSelectedTopicId(null);
       }
-    }
+    };
+
+    // Initial check
+    handleHashChange();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, [user]);
 
   useEffect(() => {
