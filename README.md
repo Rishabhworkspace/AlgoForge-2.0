@@ -33,12 +33,12 @@ AlgoForge 2.0 is a modern, gamified platform designed to help developers master 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Framework:** [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Framework:** [Next.js](https://nextjs.org/)
 - **Language:** TypeScript
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **Animations:** [Framer Motion](https://www.framer.com/motion/)
 - **Icons:** [Lucide React](https://lucide.dev/)
-- **Routing:** React Router
+- **Routing:** App Router
 
 ### Backend
 - **Runtime:** [Node.js](https://nodejs.org/)
