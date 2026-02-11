@@ -15,12 +15,13 @@ import { TopicDetail } from '@/sections/TopicDetail';
 import { Problems } from '@/sections/Problems';
 import { Notes } from '@/sections/Notes';
 import { Leaderboard } from '@/sections/Leaderboard';
+import { DailyChallenges } from '@/sections/DailyChallenges';
 import { TestimonialsPage } from '@/sections/TestimonialsPage';
 import { AuthModal } from '@/components/custom/AuthModal';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 
-type View = 'home' | 'dashboard' | 'topic' | 'problems' | 'notes' | 'leaderboard' | 'testimonials';
+type View = 'home' | 'dashboard' | 'topic' | 'problems' | 'notes' | 'leaderboard' | 'testimonials' | 'daily-challenges';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -59,6 +60,13 @@ function AppContent() {
           setCurrentView('leaderboard');
         } else if (hash === 'testimonials') {
           setCurrentView('testimonials');
+        } else if (hash === 'daily-challenges') {
+          if (user) {
+            setCurrentView('daily-challenges');
+          } else {
+            window.location.hash = '';
+            setCurrentView('home');
+          }
         } else {
           setCurrentView('home');
         }
@@ -86,7 +94,7 @@ function AppContent() {
   };
 
   const handleNavigate = (view: View, topicId?: string) => {
-    if ((view === 'dashboard' || view === 'notes' || (view === 'topic' && topicId)) && !user) {
+    if ((view === 'dashboard' || view === 'notes' || view === 'daily-challenges' || (view === 'topic' && topicId)) && !user) {
       setAuthMode('login');
       setIsAuthModalOpen(true);
       toast.info('Please log in to continue');
@@ -131,6 +139,8 @@ function AppContent() {
         return <Notes />;
       case 'leaderboard':
         return <Leaderboard />;
+      case 'daily-challenges':
+        return <DailyChallenges onBack={() => handleNavigate('dashboard')} />;
       case 'testimonials':
         return <TestimonialsPage onBack={() => handleNavigate('home')} />;
       case 'home':

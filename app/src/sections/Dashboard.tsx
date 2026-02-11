@@ -13,7 +13,7 @@ import { getAllProblems, getAllTopics } from '@/api/content';
 import { getUserProgress, getDashboardStats } from '@/api/userActions';
 
 interface DashboardProps {
-  onNavigate: (view: 'home' | 'dashboard' | 'topic' | 'problems' | 'notes' | 'leaderboard', topicId?: string) => void;
+  onNavigate: (view: 'home' | 'dashboard' | 'topic' | 'problems' | 'notes' | 'leaderboard' | 'daily-challenges', topicId?: string) => void;
 }
 
 export function Dashboard({ onNavigate }: DashboardProps) {
@@ -534,7 +534,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 Complete today's challenge to maintain your streak!
               </p>
               <button
-                onClick={() => onNavigate('problems')}
+                onClick={() => onNavigate('daily-challenges')}
                 className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#ff8a63] to-[#ff6347] text-white font-medium hover:opacity-90 transition-opacity"
               >
                 Start Challenge

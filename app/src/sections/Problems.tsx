@@ -12,10 +12,12 @@ import {
   TrendingUp,
   Clock,
   BarChart3,
-  ChevronDown
+  ChevronDown,
+  X,
+  Save
 } from 'lucide-react';
 import { getAllProblems, getAllTopics } from '@/api/content';
-import { updateProblemStatus, toggleBookmark as apiToggleBookmark, getUserProgress } from '@/api/userActions';
+import { updateProblemStatus, toggleBookmark as apiToggleBookmark, getUserProgress, updateNotes } from '@/api/userActions';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -32,6 +34,12 @@ export function Problems() {
   const [completedProblems, setCompletedProblems] = useState<Set<string>>(new Set());
   const [bookmarkedProblems, setBookmarkedProblems] = useState<Set<string>>(new Set());
 
+  // Notes modal state
+  const [notesModal, setNotesModal] = useState<{ problemId: string; problemTitle: string } | null>(null);
+  const [noteContent, setNoteContent] = useState('');
+  const [notesMap, setNotesMap] = useState<Record<string, string>>({});
+  const [savingNote, setSavingNote] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -44,6 +52,7 @@ export function Problems() {
         setTopics(topicsData);
 
         // Fetch user progress
+        const notesData: Record<string, string> = {};
         try {
           const progressData = await getUserProgress();
           const completed = new Set<string>();
@@ -51,9 +60,13 @@ export function Problems() {
           progressData.forEach((p: any) => {
             if (p.status === 'SOLVED') completed.add(p.problem_id);
             if (p.is_bookmarked) bookmarked.add(p.problem_id);
+            if (p.notes && p.notes.trim()) {
+              notesData[p.problem_id] = p.notes;
+            }
           });
           setCompletedProblems(completed);
           setBookmarkedProblems(bookmarked);
+          setNotesMap(notesData);
         } catch (err) {
           // Ignore if not logged in
         }
@@ -397,11 +410,14 @@ export function Problems() {
                     </button>
 
                     <button
-                      onClick={() => toast.info('Notes feature coming soon!')}
-                      className="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors group"
-                      title="Add Notes"
+                      onClick={() => {
+                        setNotesModal({ problemId: problemMongoId, problemTitle: problem.title });
+                        setNoteContent(notesMap[problemMongoId] || '');
+                      }}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors group ${notesMap[problemMongoId] ? 'bg-[#a088ff]/20' : 'bg-white/5 hover:bg-white/10'}`}
+                      title={notesMap[problemMongoId] ? 'Edit Notes' : 'Add Notes'}
                     >
-                      <FileText className="w-5 h-5 text-white/60 group-hover:text-white" />
+                      <FileText className={`w-5 h-5 ${notesMap[problemMongoId] ? 'text-[#a088ff]' : 'text-white/60 group-hover:text-white'}`} />
                     </button>
                   </div>
                 </div>
@@ -420,6 +436,62 @@ export function Problems() {
           </div>
         )}
       </div>
+
+      {/* Notes Modal */}
+      {notesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setNotesModal(null)} />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="relative w-full max-w-lg mx-4 glass rounded-2xl p-6 border border-white/10"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-white">Notes</h3>
+                <p className="text-sm text-white/40 truncate max-w-[300px]">{notesModal.problemTitle}</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    if (!notesModal) return;
+                    setSavingNote(true);
+                    try {
+                      await updateNotes(notesModal.problemId, noteContent);
+                      setNotesMap(prev => ({ ...prev, [notesModal.problemId]: noteContent }));
+                      toast.success(noteContent.trim() ? 'Note saved!' : 'Note cleared');
+                      setNotesModal(null);
+                    } catch (e) {
+                      toast.error('Failed to save note. Please log in.');
+                    } finally {
+                      setSavingNote(false);
+                    }
+                  }}
+                  disabled={savingNote}
+                  className="px-3 py-1.5 rounded-lg bg-[#a088ff]/20 text-[#a088ff] hover:bg-[#a088ff]/30 transition-colors flex items-center gap-1.5"
+                >
+                  <Save className="w-4 h-4" />
+                  {savingNote ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  onClick={() => setNotesModal(null)}
+                  className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <textarea
+              value={noteContent}
+              onChange={(e) => setNoteContent(e.target.value)}
+              placeholder="Write your notes... Key insights, approach, time complexity, etc."
+              rows={10}
+              autoFocus
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-[#a088ff] resize-none font-mono text-sm"
+            />
+          </motion.div>
+        </div>
+      )}
     </section>
   );
 }
