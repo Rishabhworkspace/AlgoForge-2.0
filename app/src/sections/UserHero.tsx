@@ -1,6 +1,9 @@
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Zap, CheckCircle2, Trophy, Activity, PlayCircle } from 'lucide-react';
+import { Flame, Zap, CheckCircle2, Trophy, Activity, PlayCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getDashboardStats, getUserProgress } from '@/api/userActions';
+import { getAllProblems, getAllTopics } from '@/api/content';
 
 interface UserHeroProps {
     user: any;
@@ -8,22 +11,160 @@ interface UserHeroProps {
 }
 
 export function UserHero({ user, onTopicClick }: UserHeroProps) {
+    const [dashboardStats, setDashboardStats] = useState<any>(null);
+    const [problems, setProblems] = useState<any[]>([]);
+    const [topics, setTopics] = useState<any[]>([]);
+    const [userProgress, setUserProgress] = useState<any[]>([]);
 
-    // Calculate generic rank/level based on XP
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [statsData, problemsData, topicsData] = await Promise.all([
+                    getDashboardStats().catch(() => null),
+                    getAllProblems().catch(() => []),
+                    getAllTopics().catch(() => [])
+                ]);
+                setDashboardStats(statsData);
+                setProblems(problemsData);
+                setTopics(topicsData);
+
+                try {
+                    const progress = await getUserProgress();
+                    setUserProgress(progress);
+                } catch (e) {
+                    // Not logged in or error
+                }
+            } catch (e) {
+                console.error("Failed to load hero data", e);
+            }
+        };
+        fetchData();
+    }, []);
+
+    // Compute solved stats
+    const solvedIds = useMemo(() => {
+        const solved = userProgress.filter((p: any) => p.status === 'SOLVED');
+        return new Set(solved.map((p: any) => p.problem_id));
+    }, [userProgress]);
+
+    const totalSolved = solvedIds.size;
+
+    // Streak and rank from backend
+    const currentStreak = dashboardStats?.currentStreak ?? (user.streak_days || 0);
+    const rank = dashboardStats?.rank ?? '--';
+    const topPercent = dashboardStats?.topPercent ?? '--';
+
     const level = Math.floor((user.xp_points || 0) / 100) + 1;
     const nextLevelXp = level * 100;
     const progressToNextLevel = ((user.xp_points || 0) % 100) / 100 * 100;
 
-    // Mock activity data if empty
-    const activityData = user.activityLog || [
-        { day: 'Mon', count: 2 },
-        { day: 'Tue', count: 4 },
-        { day: 'Wed', count: 0 },
-        { day: 'Thu', count: 5 },
-        { day: 'Fri', count: 3 },
-        { day: 'Sat', count: 1 },
-        { day: 'Sun', count: 0 },
-    ];
+    // Overall completion percentage
+    const completionPercentage = problems.length > 0 ? Math.round((totalSolved / problems.length) * 100) : 0;
+
+    // Weekly activity from backend
+    const weeklyActivity = useMemo(() => {
+        if (dashboardStats?.weeklyActivity) {
+            return dashboardStats.weeklyActivity.map((d: any) => {
+                const date = new Date(d.date + 'T00:00:00');
+                return {
+                    day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+                    count: d.count
+                };
+            });
+        }
+        return [
+            { day: 'Mon', count: 0 },
+            { day: 'Tue', count: 0 },
+            { day: 'Wed', count: 0 },
+            { day: 'Thu', count: 0 },
+            { day: 'Fri', count: 0 },
+            { day: 'Sat', count: 0 },
+            { day: 'Sun', count: 0 },
+        ];
+    }, [dashboardStats]);
+
+    const maxActivity = Math.max(...weeklyActivity.map((d: any) => d.count), 1);
+
+    // Continue Learning - find the topic with most recent activity
+    const continueTopicData = useMemo(() => {
+        const solvedProgress = userProgress.filter((p: any) => p.status === 'SOLVED');
+
+        // Build per-topic stats
+        const topicStats = topics.map((topic: any) => {
+            const topicProblems = problems.filter((p: any) => p.topic_id === topic.id);
+            const totalInTopic = topicProblems.length;
+            const solvedInTopic = topicProblems.filter((p: any) => solvedIds.has(p._id)).length;
+            const progress = totalInTopic > 0 ? Math.round((solvedInTopic / totalInTopic) * 100) : 0;
+
+            // Most recent solve for this topic
+            const topicProblemIds = new Set(topicProblems.map((p: any) => p._id));
+            const topicSolves = solvedProgress.filter((p: any) => topicProblemIds.has(p.problem_id));
+            const lastSolveDate = topicSolves.length > 0
+                ? Math.max(...topicSolves.map((p: any) => new Date(p.updatedAt).getTime()))
+                : 0;
+
+            return {
+                ...topic,
+                solvedInTopic,
+                totalInTopic,
+                progress,
+                lastSolveDate
+            };
+        });
+
+        // Topic with the most recent activity (that isn't 100% complete)
+        const inProgress = topicStats
+            .filter((t: any) => t.lastSolveDate > 0 && t.progress < 100)
+            .sort((a: any, b: any) => b.lastSolveDate - a.lastSolveDate);
+
+        if (inProgress.length > 0) {
+            return inProgress[0];
+        }
+
+        // Fallback: first topic with any problems
+        const withProblems = topicStats.filter((t: any) => t.totalInTopic > 0);
+        return withProblems.length > 0 ? withProblems[0] : null;
+    }, [topics, problems, userProgress, solvedIds]);
+
+    // Next goals: dynamically based on progress
+    const nextGoals = useMemo(() => {
+        const goals: any[] = [];
+
+        // Level up goal
+        goals.push({
+            title: `Reach Level ${level + 1}`,
+            subtitle: 'XP Milestone',
+            current: user.xp_points || 0,
+            target: nextLevelXp,
+            rewards: [`+${nextLevelXp - (user.xp_points || 0)} XP needed`]
+        });
+
+        // Solved milestone
+        const solvedMilestones = [5, 10, 25, 50, 100];
+        const nextMilestone = solvedMilestones.find(m => m > totalSolved) || solvedMilestones[solvedMilestones.length - 1];
+        if (nextMilestone > totalSolved) {
+            goals.push({
+                title: `Solve ${nextMilestone} Problems`,
+                subtitle: 'Problem Challenge',
+                current: totalSolved,
+                target: nextMilestone,
+                rewards: ['Badge', `+${nextMilestone * 5} XP`]
+            });
+        }
+
+        // Streak goal
+        if (currentStreak < 7) {
+            goals.push({
+                title: '7-Day Streak',
+                subtitle: 'Consistency Goal',
+                current: currentStreak,
+                target: 7,
+                rewards: ['Streak Shield', '+100 XP']
+            });
+        }
+
+        return goals.slice(0, 2);
+    }, [level, nextLevelXp, user.xp_points, totalSolved, currentStreak]);
 
     return (
         <section className="relative pt-32 pb-20 overflow-hidden">
@@ -52,10 +193,10 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
                     {[
                         {
                             label: 'Current Streak',
-                            value: `${user.streak_days || 0} Days`,
+                            value: `${currentStreak} Days`,
                             icon: Flame,
                             color: '#ff8a63',
-                            subtext: 'Keep it up!'
+                            subtext: currentStreak > 0 ? 'Keep it up!' : 'Solve a problem to start!'
                         },
                         {
                             label: 'Total XP',
@@ -66,17 +207,17 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
                         },
                         {
                             label: 'Problems Solved',
-                            value: user.solvedProblems?.length || 0,
+                            value: totalSolved,
                             icon: CheckCircle2,
                             color: '#88ff9f',
-                            subtext: `Top ${(user.solvedProblems?.length || 0) > 10 ? '10%' : '50%'}`
+                            subtext: `${completionPercentage}% complete`
                         },
                         {
                             label: 'Global Rank',
-                            value: '#42',
+                            value: `#${rank}`,
                             icon: Trophy,
                             color: '#a088ff',
-                            subtext: 'Top 5%'
+                            subtext: `Top ${topPercent}%`
                         }
                     ].map((stat, index) => (
                         <motion.div
@@ -125,19 +266,38 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
                             <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                                 <div>
                                     <h3 className="text-2xl font-semibold text-white mb-2">Continue Learning</h3>
-                                    <p className="text-white/60 mb-6 max-w-md">
-                                        You were working on <span className="text-[#a088ff]">Arrays & Strings</span>.
-                                        Ready to tackle the next challenge?
-                                    </p>
-                                    <Button
-                                        onClick={() => onTopicClick('arrays-strings')}
-                                        className="bg-[#a088ff] text-white hover:bg-[#8e72ff] rounded-xl px-8 py-6 text-lg"
-                                    >
-                                        <PlayCircle className="w-5 h-5 mr-2" />
-                                        Resume Arrays
-                                    </Button>
+                                    {continueTopicData ? (
+                                        <>
+                                            <p className="text-white/60 mb-6 max-w-md">
+                                                You were working on <span className="text-[#a088ff]">{continueTopicData.title}</span>.
+                                                {continueTopicData.progress > 0
+                                                    ? ` ${continueTopicData.solvedInTopic}/${continueTopicData.totalInTopic} problems solved.`
+                                                    : ' Ready to tackle the next challenge?'}
+                                            </p>
+                                            <Button
+                                                onClick={() => onTopicClick(continueTopicData.id || continueTopicData._id)}
+                                                className="bg-[#a088ff] text-white hover:bg-[#8e72ff] rounded-xl px-8 py-6 text-lg"
+                                            >
+                                                <PlayCircle className="w-5 h-5 mr-2" />
+                                                Resume {continueTopicData.title.split(' ')[0]}
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-white/60 mb-6 max-w-md">
+                                                Start solving problems from any topic to track your progress!
+                                            </p>
+                                            <Button
+                                                onClick={() => onTopicClick('')}
+                                                className="bg-[#a088ff] text-white hover:bg-[#8e72ff] rounded-xl px-8 py-6 text-lg"
+                                            >
+                                                <PlayCircle className="w-5 h-5 mr-2" />
+                                                Explore Topics
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
-                                {/* Progress Ring or Graphic */}
+                                {/* Progress Ring */}
                                 <div className="relative w-32 h-32 flex-shrink-0">
                                     <svg className="w-full h-full transform -rotate-90">
                                         <circle
@@ -157,12 +317,14 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
                                             strokeWidth="8"
                                             fill="transparent"
                                             strokeDasharray={364}
-                                            strokeDashoffset={364 - (364 * 35) / 100} // 35% progress mock
+                                            strokeDashoffset={364 - (364 * (continueTopicData?.progress || completionPercentage)) / 100}
                                             strokeLinecap="round"
                                         />
                                     </svg>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                        <span className="text-2xl font-bold text-white">35%</span>
+                                        <span className="text-2xl font-bold text-white">
+                                            {continueTopicData?.progress ?? completionPercentage}%
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -183,14 +345,15 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
                                 <span className="text-sm text-white/40">Last 7 Days</span>
                             </div>
                             <div className="flex items-end justify-between h-32 gap-4">
-                                {activityData.map((day: any, i: number) => (
+                                {weeklyActivity.map((day: any, i: number) => (
                                     <div key={i} className="flex flex-col items-center gap-2 flex-1 group">
+                                        <span className="text-xs text-white/40">{day.count > 0 ? day.count : ''}</span>
                                         <div className="w-full bg-white/5 rounded-t-lg relative h-full flex items-end overflow-hidden">
                                             <motion.div
                                                 initial={{ height: 0 }}
-                                                animate={{ height: `${(day.count / 5) * 100}%` }} // Max 5 problems/day scale
+                                                animate={{ height: day.count > 0 ? `${(day.count / maxActivity) * 100}%` : '0%' }}
                                                 transition={{ duration: 1, delay: 0.5 + (i * 0.1) }}
-                                                className="w-full bg-gradient-to-t from-[#63e3ff]/20 to-[#63e3ff] opacity-60 group-hover:opacity-100 transition-opacity"
+                                                className={`w-full ${day.count > 0 ? 'bg-gradient-to-t from-[#63e3ff]/20 to-[#63e3ff] opacity-60 group-hover:opacity-100' : 'bg-white/5'} transition-opacity`}
                                             />
                                         </div>
                                         <span className="text-xs text-white/40">{day.day}</span>
@@ -209,36 +372,44 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
                     >
                         <h3 className="text-lg font-semibold text-white mb-6">Next Goals</h3>
                         <div className="space-y-6">
+                            {/* Level progress */}
                             <div>
                                 <div className="flex justify-between text-sm mb-2">
                                     <span className="text-white/60">Reach Level {level + 1}</span>
                                     <span className="text-[#ffd700]">{user.xp_points || 0} / {nextLevelXp} XP</span>
                                 </div>
                                 <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                                    <div
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${progressToNextLevel}%` }}
+                                        transition={{ duration: 1, delay: 0.7 }}
                                         className="h-full bg-[#ffd700] rounded-full"
-                                        style={{ width: `${progressToNextLevel}%` }}
                                     />
                                 </div>
                             </div>
 
-                            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                                <h4 className="font-medium text-white mb-1">Solve 3 Medium Problems</h4>
-                                <p className="text-xs text-white/40 mb-3">Daily Challenge</p>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs px-2 py-1 rounded bg-[#a088ff]/20 text-[#a088ff]">+50 XP</span>
-                                    <span className="text-xs px-2 py-1 rounded bg-[#63e3ff]/20 text-[#63e3ff]">Streak Shield</span>
+                            {/* Dynamic goals */}
+                            {nextGoals.map((goal: any, index: number) => (
+                                <div key={index} className="p-4 bg-white/5 rounded-xl border border-white/10">
+                                    <h4 className="font-medium text-white mb-1">{goal.title}</h4>
+                                    <p className="text-xs text-white/40 mb-2">{goal.subtitle}</p>
+                                    {goal.target && (
+                                        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mb-3">
+                                            <div
+                                                className="h-full bg-[#a088ff] rounded-full"
+                                                style={{ width: `${Math.min((goal.current / goal.target) * 100, 100)}%` }}
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-2">
+                                        {goal.rewards.map((reward: string, ri: number) => (
+                                            <span key={ri} className="text-xs px-2 py-1 rounded bg-[#a088ff]/20 text-[#a088ff]">
+                                                {reward}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                                <h4 className="font-medium text-white mb-1">Complete "Trees" Module</h4>
-                                <p className="text-xs text-white/40 mb-3">Roadmap Goal</p>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs px-2 py-1 rounded bg-[#ffd700]/20 text-[#ffd700]">+200 XP</span>
-                                    <span className="text-xs px-2 py-1 rounded bg-[#88ff9f]/20 text-[#88ff9f]">Badge</span>
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </motion.div>
                 </div>
