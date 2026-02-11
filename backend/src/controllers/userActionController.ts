@@ -32,10 +32,49 @@ export const updateProblemStatus = async (req: Request | any, res: Response) => 
 
         // Sync with User model for Leaderboard & Profile
         if (status === 'SOLVED' && previousStatus !== 'SOLVED') {
-            await User.findByIdAndUpdate(userId, {
-                $inc: { xp_points: 25 },
-                $addToSet: { solvedProblems: { problemId: problemId, solvedAt: new Date() } }
-            });
+            // Update XP and solved list
+            const userDoc: any = await User.findById(userId);
+            if (userDoc) {
+                userDoc.xp_points = (userDoc.xp_points || 0) + 25;
+                userDoc.solvedProblems = userDoc.solvedProblems || [];
+                userDoc.solvedProblems.push({ problemId: problemId, solvedAt: new Date() });
+
+                // --- Streak Logic ---
+                const today = new Date();
+                const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
+                const lastActive = userDoc.last_active ? new Date(userDoc.last_active) : null;
+                const lastActiveStr = lastActive ? lastActive.toISOString().split('T')[0] : null;
+
+                if (lastActiveStr === todayStr) {
+                    // Same day — streak unchanged
+                } else if (lastActiveStr) {
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+                    if (lastActiveStr === yesterdayStr) {
+                        // Consecutive day — increment streak
+                        userDoc.streak_days = (userDoc.streak_days || 0) + 1;
+                    } else {
+                        // Gap — reset streak to 1
+                        userDoc.streak_days = 1;
+                    }
+                } else {
+                    // First activity ever
+                    userDoc.streak_days = 1;
+                }
+                userDoc.last_active = today;
+
+                // --- Activity Log ---
+                userDoc.activityLog = userDoc.activityLog || [];
+                const todayLog = userDoc.activityLog.find((log: any) => log.date === todayStr);
+                if (todayLog) {
+                    todayLog.count += 1;
+                } else {
+                    userDoc.activityLog.push({ date: todayStr, count: 1 });
+                }
+
+                await userDoc.save();
+            }
         } else if (status !== 'SOLVED' && previousStatus === 'SOLVED') {
             await User.findByIdAndUpdate(userId, {
                 $inc: { xp_points: -25 },

@@ -23,6 +23,11 @@ export const updateNotes = async (problemId: string, notes: string) => {
     return response.data;
 };
 
+export const getDashboardStats = async () => {
+    const response = await axios.get(`${API_BASE_URL}/api/users/dashboard-stats`, getAuthHeader());
+    return response.data;
+};
+
 export const getUserProgress = async () => {
     const response = await axios.get(`${API_BASE_URL}/api/user-actions/progress`, getAuthHeader());
     return response.data;

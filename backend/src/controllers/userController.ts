@@ -75,3 +75,66 @@ export const getLeaderboard = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Server Error' });
     }
 };
+
+// @desc    Get dashboard stats for logged-in user (rank, streak, weekly activity)
+// @route   GET /api/users/dashboard-stats
+// @access  Private
+export const getDashboardStats = async (req: Request | any, res: Response) => {
+    try {
+        const userId = req.user._id;
+        const user: any = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // --- Compute Rank ---
+        const usersWithMoreXP = await User.countDocuments({ xp_points: { $gt: user.xp_points || 0 } });
+        const rank = usersWithMoreXP + 1;
+        const totalUsers = await User.countDocuments({});
+        const topPercent = totalUsers > 0 ? Math.round((rank / totalUsers) * 100) : 100;
+
+        // --- Validate Streak ---
+        // If the user hasn't been active today or yesterday, their streak should show as 0 (broken)
+        let currentStreak = user.streak_days || 0;
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        const lastActiveStr = user.last_active ? new Date(user.last_active).toISOString().split('T')[0] : null;
+
+        if (lastActiveStr !== todayStr && lastActiveStr !== yesterdayStr) {
+            // Streak is broken (inactive for more than 1 day)
+            currentStreak = 0;
+        }
+
+        // --- Weekly Activity (last 7 days) ---
+        const weekDays: string[] = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            weekDays.push(d.toISOString().split('T')[0]);
+        }
+
+        const activityLog = user.activityLog || [];
+        const weeklyActivity = weekDays.map((dateStr: string) => {
+            const entry = activityLog.find((log: any) => log.date === dateStr);
+            return {
+                date: dateStr,
+                count: entry ? entry.count : 0
+            };
+        });
+
+        res.status(200).json({
+            rank,
+            totalUsers,
+            topPercent,
+            currentStreak,
+            weeklyActivity
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};

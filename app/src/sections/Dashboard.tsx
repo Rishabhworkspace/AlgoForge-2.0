@@ -10,8 +10,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getAllProblems, getAllTopics } from '@/api/content';
-import { getUserProgress } from '@/api/userActions';
-import { toast } from 'sonner';
+import { getUserProgress, getDashboardStats } from '@/api/userActions';
 
 interface DashboardProps {
   onNavigate: (view: 'home' | 'dashboard' | 'topic' | 'problems' | 'notes' | 'leaderboard', topicId?: string) => void;
@@ -23,6 +22,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   const [problems, setProblems] = useState<any[]>([]);
   const [topics, setTopics] = useState<any[]>([]);
   const [userProgress, setUserProgress] = useState<any[]>([]);
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,10 +37,14 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         setTopics(topicsData);
 
         try {
-          const progress = await getUserProgress();
+          const [progress, stats] = await Promise.all([
+            getUserProgress(),
+            getDashboardStats()
+          ]);
           setUserProgress(progress);
+          setDashboardStats(stats);
         } catch (e) {
-          console.log("Failed to load progress (not logged in?)");
+          console.log("Failed to load user-specific data (not logged in?)");
         }
       } catch (e) {
         console.error("Failed to load dashboard data", e);
@@ -57,7 +61,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
 
     const totalSolved = solvedIds.size;
     const totalProblems = problems.length;
-    const xpPoints = totalSolved * 25; // 25 XP per problem
+    const xpPoints = profile?.xp_points ?? totalSolved * 25;
 
     let easy = 0, medium = 0, hard = 0;
     problems.forEach((p: any) => {
@@ -71,15 +75,19 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     // Recent Activity
     const recent = solvedProgress
       .sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-      .slice(0, 3)
+      .slice(0, 5)
       .map((p: any) => {
         const prob = problems.find((prob: any) => prob._id === p.problem_id);
         return {
           problem: prob ? prob.title : 'Unknown Problem',
-          time: new Date(p.updatedAt).toLocaleDateString(), // Simplification
+          time: new Date(p.updatedAt).toLocaleDateString(),
+          difficulty: prob?.difficulty || 'Medium',
           status: 'completed'
         };
       });
+
+    // Streaks from backend stats
+    const currentStreak = dashboardStats?.currentStreak ?? 0;
 
     return {
       totalSolved,
@@ -89,22 +97,86 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       mediumSolved: medium,
       hardSolved: hard,
       recentActivity: recent,
-      currentStreak: 0, // TODO: Implement streak logic backend side
-      longestStreak: 0
+      currentStreak
     };
-  }, [problems, userProgress]);
+  }, [problems, userProgress, dashboardStats, profile]);
 
-  // Mock for now
-  const weeklyProgress = [3, 5, 2, 7, 4, 6, 8];
+  // Weekly activity from backend (last 7 days), fallback to zeros
+  const weeklyProgress = useMemo(() => {
+    if (dashboardStats?.weeklyActivity) {
+      return dashboardStats.weeklyActivity.map((d: any) => d.count);
+    }
+    return [0, 0, 0, 0, 0, 0, 0];
+  }, [dashboardStats]);
+
+  // Max value for chart scaling
+  const maxWeekly = Math.max(...weeklyProgress, 1);
+
+  // Rank info from backend
+  const rankInfo = useMemo(() => {
+    if (dashboardStats) {
+      return {
+        rank: dashboardStats.rank,
+        topPercent: dashboardStats.topPercent
+      };
+    }
+    return { rank: '--', topPercent: '--' };
+  }, [dashboardStats]);
+
+  // Continue Learning — topics with progress, sorted by most recent activity
+  const continueTopics = useMemo(() => {
+    const solvedProgress = userProgress.filter((p: any) => p.status === 'SOLVED');
+    const solvedIds = new Set(solvedProgress.map((p: any) => p.problem_id));
+
+    return topics.map((topic: any) => {
+      const topicProblems = problems.filter((p: any) => p.topic_id === topic.id);
+      const totalInTopic = topicProblems.length;
+      const solvedInTopic = topicProblems.filter((p: any) => solvedIds.has(p._id)).length;
+      const progress = totalInTopic > 0 ? Math.round((solvedInTopic / totalInTopic) * 100) : 0;
+
+      // Find the most recent solve date for this topic
+      const topicProblemIds = new Set(topicProblems.map((p: any) => p._id));
+      const topicSolves = solvedProgress.filter((p: any) => topicProblemIds.has(p.problem_id));
+      const lastSolveDate = topicSolves.length > 0
+        ? Math.max(...topicSolves.map((p: any) => new Date(p.updatedAt).getTime()))
+        : 0;
+
+      return {
+        ...topic,
+        solvedInTopic,
+        totalInTopic,
+        progress,
+        lastSolveDate
+      };
+    })
+      // Show topics with progress first, sorted by most recent activity, then remaining topics
+      .sort((a: any, b: any) => {
+        if (a.solvedInTopic > 0 && b.solvedInTopic === 0) return -1;
+        if (a.solvedInTopic === 0 && b.solvedInTopic > 0) return 1;
+        return b.lastSolveDate - a.lastSolveDate;
+      })
+      .slice(0, 4);
+  }, [topics, problems, userProgress]);
 
   const mockBadges = [
     { id: 'b1', name: 'First Steps', icon: 'Footprints', earned: stats.totalSolved > 0 },
     { id: 'b2', name: 'Rising Star', icon: 'Star', earned: stats.totalSolved >= 10 },
     { id: 'b3', name: 'Problem Solver', icon: 'Trophy', earned: stats.totalSolved >= 50 },
-    { id: 'b4', name: 'Streak Keeper', icon: 'Flame', earned: false },
+    { id: 'b4', name: 'Streak Keeper', icon: 'Flame', earned: stats.currentStreak >= 3 },
   ];
 
   const completionPercentage = stats.totalProblems > 0 ? Math.round((stats.totalSolved / stats.totalProblems) * 100) : 0;
+
+  // Day labels for weekly chart (Mon-Sun matching actual dates)
+  const dayLabels = useMemo(() => {
+    if (dashboardStats?.weeklyActivity) {
+      return dashboardStats.weeklyActivity.map((d: any) => {
+        const date = new Date(d.date + 'T00:00:00');
+        return date.toLocaleDateString('en-US', { weekday: 'short' });
+      });
+    }
+    return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  }, [dashboardStats]);
 
   if (loading) {
     return <div className="min-h-screen pt-24 text-center text-white/60">Loading dashboard...</div>;
@@ -136,7 +208,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 px-4 py-2 rounded-full glass">
-                <Flame className="w-5 h-5 text-[#ff8a63] animate-flame" />
+                <Flame className={`w-5 h-5 ${stats.currentStreak > 0 ? 'text-[#ff8a63] animate-flame' : 'text-white/30'}`} />
                 <span className="text-white font-medium">{stats.currentStreak} day streak</span>
               </div>
             </div>
@@ -180,7 +252,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <span className="text-white/60 text-sm">Streak</span>
             </div>
             <p className="text-2xl font-bold text-white">{stats.currentStreak}</p>
-            <p className="text-xs text-white/40">Best: {stats.longestStreak} days</p>
+            <p className="text-xs text-white/40">{stats.currentStreak > 0 ? 'Keep it up!' : 'Solve to start!'}</p>
           </div>
 
           <div className="glass rounded-xl p-4">
@@ -190,8 +262,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               </div>
               <span className="text-white/60 text-sm">Rank</span>
             </div>
-            <p className="text-2xl font-bold text-white">#--</p>
-            <p className="text-xs text-white/40">Top --%</p>
+            <p className="text-2xl font-bold text-white">#{rankInfo.rank}</p>
+            <p className="text-xs text-white/40">Top {rankInfo.topPercent}%</p>
           </div>
         </motion.div>
 
@@ -249,15 +321,22 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="glass rounded-2xl p-6"
             >
-              <h3 className="text-lg font-semibold text-white mb-4">Weekly Activity</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white">Weekly Activity</h3>
+                <span className="text-xs text-white/40">Last 7 Days</span>
+              </div>
               <div className="flex items-end justify-between h-32 gap-2">
-                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
-                  <div key={day} className="flex-1 flex flex-col items-center gap-2">
+                {dayLabels.map((day: string, index: number) => (
+                  <div key={day + index} className="flex-1 flex flex-col items-center gap-2">
+                    <span className="text-xs text-white/60 mb-1">{weeklyProgress[index]}</span>
                     <motion.div
                       initial={{ height: 0 }}
-                      animate={{ height: `${(weeklyProgress[index] / 10) * 100}%` }}
+                      animate={{ height: `${weeklyProgress[index] > 0 ? (weeklyProgress[index] / maxWeekly) * 100 : 4}%` }}
                       transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-                      className="w-full max-w-12 rounded-t-lg bg-gradient-to-t from-[#a088ff] to-[#63e3ff] min-h-[4px]"
+                      className={`w-full max-w-12 rounded-t-lg min-h-[4px] ${weeklyProgress[index] > 0
+                        ? 'bg-gradient-to-t from-[#a088ff] to-[#63e3ff]'
+                        : 'bg-white/10'
+                        }`}
                     />
                     <span className="text-xs text-white/60">{day}</span>
                   </div>
@@ -291,7 +370,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                     <span className="text-xs text-[#7ca700]">+25 XP</span>
                   </div>
                 )) : (
-                  <p className="text-white/40 text-sm">No recent activity.</p>
+                  <p className="text-white/40 text-sm">No recent activity. Start solving problems!</p>
                 )}
               </div>
             </motion.div>
@@ -345,7 +424,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             >
               <h3 className="text-lg font-semibold text-white mb-4">Continue Learning</h3>
               <div className="space-y-3">
-                {topics.slice(0, 3).map((topic) => (
+                {continueTopics.map((topic: any) => (
                   <button
                     key={topic.id}
                     onClick={() => onNavigate('topic', topic.id)}
@@ -362,14 +441,14 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                       <div className="flex items-center gap-2 mt-1">
                         <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
                           <div
-                            className="h-full rounded-full"
+                            className="h-full rounded-full transition-all duration-500"
                             style={{
-                              width: '0%', // Calculate real progress if possible
+                              width: `${topic.progress}%`,
                               background: topic.color
                             }}
                           />
                         </div>
-                        <span className="text-xs text-white/40">--%</span>
+                        <span className="text-xs text-white/40">{topic.progress}%</span>
                       </div>
                     </div>
                     <ArrowRight className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
@@ -393,7 +472,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 Complete today's challenge to maintain your streak!
               </p>
               <button
-                onClick={() => toast.info('Daily challenge coming soon!')}
+                onClick={() => onNavigate('problems')}
                 className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#ff8a63] to-[#ff6347] text-white font-medium hover:opacity-90 transition-opacity"
               >
                 Start Challenge
