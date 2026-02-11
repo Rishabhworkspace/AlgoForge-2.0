@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Zap, CheckCircle2, Trophy, Activity, PlayCircle, ArrowRight } from 'lucide-react';
+import { Flame, Zap, CheckCircle2, Trophy, Activity, PlayCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getDashboardStats, getUserProgress } from '@/api/userActions';
 import { getAllProblems, getAllTopics } from '@/api/content';
