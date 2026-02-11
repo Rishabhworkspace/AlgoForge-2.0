@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { getTopicById, getProblemsByTopic } from '@/api/content';
 import { updateProblemStatus, toggleBookmark as apiToggleBookmark, getUserProgress } from '@/api/userActions';
+import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
@@ -22,6 +23,7 @@ interface TopicDetailProps {
 }
 
 export function TopicDetail({ topicId, onBack }: TopicDetailProps) {
+  const { refreshProfile } = useAuth();
   const [topic, setTopic] = useState<any>(null);
   const [problems, setProblems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -112,6 +114,8 @@ export function TopicDetail({ topicId, onBack }: TopicDetailProps) {
     try {
       await updateProblemStatus(problemMongoId, wasCompleted ? 'TODO' : 'SOLVED');
       if (!wasCompleted) toast.success('Problem marked as complete! +25 XP');
+      // Refresh profile so nav XP updates immediately
+      refreshProfile();
     } catch (e) {
       // Revert
       setCompletedProblems(prev => {

@@ -20,6 +20,7 @@ interface AuthContextType {
   signInWithGoogle: (credential?: string) => Promise<{ error: any; isNewUser?: boolean }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: any) => Promise<{ error: any }>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,6 +33,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const refreshProfile = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const userData = await res.json();
+        const userObj = {
+          id: userData._id,
+          email: userData.email,
+          name: userData.name,
+          xp_points: userData.xp_points,
+          streak_days: userData.streak_days,
+          solvedProblems: userData.solvedProblems,
+          activityLog: userData.activityLog
+        };
+
+        setUser(userObj);
+        setProfile({ ...userData, id: userData._id });
+      }
+    } catch (error) {
+      console.error('Profile refresh failed', error);
+    }
+  };
+
   useEffect(() => {
     const checkSession = async () => {
       const token = localStorage.getItem('token');
@@ -41,33 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const res = await fetch(`${API_BASE_URL}/api/users/me`, {
-
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (res.ok) {
-          const userData = await res.json();
-          // Backend returns _id, map to id
-          const userObj = {
-            id: userData._id,
-            email: userData.email,
-            name: userData.name,
-            xp_points: userData.xp_points,
-            streak_days: userData.streak_days,
-            solvedProblems: userData.solvedProblems,
-            activityLog: userData.activityLog
-          };
-
-          setUser(userObj);
-          setProfile({ ...userData, id: userData._id });
-        } else {
-          localStorage.removeItem('token');
-          setUser(null);
-          setProfile(null);
-        }
+        await refreshProfile();
       } catch (error) {
         console.error('Session check failed', error);
         localStorage.removeItem('token');
@@ -212,7 +218,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signUp,
       signInWithGoogle,
       signOut,
-      updateProfile
+      updateProfile,
+      refreshProfile
     }}>
       {children}
     </AuthContext.Provider>

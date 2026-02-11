@@ -16,10 +16,12 @@ import {
 } from 'lucide-react';
 import { getAllProblems, getAllTopics } from '@/api/content';
 import { updateProblemStatus, toggleBookmark as apiToggleBookmark, getUserProgress } from '@/api/userActions';
+import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 export function Problems() {
+  const { refreshProfile } = useAuth();
   const [allProblems, setProblems] = useState<any[]>([]);
   const [topics, setTopics] = useState<any[]>([]);
   const [filtersLoading, setFiltersLoading] = useState(true);
@@ -109,6 +111,8 @@ export function Problems() {
     try {
       await updateProblemStatus(problemMongoId, wasCompleted ? 'TODO' : 'SOLVED');
       if (!wasCompleted) toast.success('Problem marked as complete! +25 XP');
+      // Refresh profile so nav XP updates immediately
+      refreshProfile();
     } catch (e) {
       setCompletedProblems(prev => {
         const newSet = new Set(prev);
@@ -249,8 +253,8 @@ export function Problems() {
                   key={diff}
                   onClick={() => setDifficultyFilter(diff)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${difficultyFilter === diff
-                      ? 'bg-white/20 text-white'
-                      : 'bg-white/5 text-white/60 hover:bg-white/10'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-white/5 text-white/60 hover:bg-white/10'
                     }`}
                 >
                   {diff === 'all' ? 'All' : diff}
@@ -384,8 +388,8 @@ export function Problems() {
                     <button
                       onClick={() => toggleBookmark(problem.id, problemMongoId)}
                       className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${isBookmarked
-                          ? 'bg-[#ffd700]/20'
-                          : 'bg-white/5 hover:bg-[#ffd700]/10'
+                        ? 'bg-[#ffd700]/20'
+                        : 'bg-white/5 hover:bg-[#ffd700]/10'
                         }`}
                       title="Bookmark"
                     >

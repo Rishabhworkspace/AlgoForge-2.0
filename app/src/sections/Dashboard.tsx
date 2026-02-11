@@ -314,7 +314,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               </div>
             </motion.div>
 
-            {/* Weekly Activity */}
+            {/* Weekly Activity - Line Graph */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -325,22 +325,84 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 <h3 className="text-lg font-semibold text-white">Weekly Activity</h3>
                 <span className="text-xs text-white/40">Last 7 Days</span>
               </div>
-              <div className="flex items-end justify-between h-32 gap-2">
-                {dayLabels.map((day: string, index: number) => (
-                  <div key={day + index} className="flex-1 flex flex-col items-center gap-2">
-                    <span className="text-xs text-white/60 mb-1">{weeklyProgress[index]}</span>
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: `${weeklyProgress[index] > 0 ? (weeklyProgress[index] / maxWeekly) * 100 : 4}%` }}
-                      transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-                      className={`w-full max-w-12 rounded-t-lg min-h-[4px] ${weeklyProgress[index] > 0
-                        ? 'bg-gradient-to-t from-[#a088ff] to-[#63e3ff]'
-                        : 'bg-white/10'
-                        }`}
-                    />
-                    <span className="text-xs text-white/60">{day}</span>
-                  </div>
-                ))}
+              <div className="w-full h-36 relative">
+                <svg viewBox="0 0 300 110" className="w-full h-full" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="dashAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#a088ff" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#63e3ff" stopOpacity="0.02" />
+                    </linearGradient>
+                  </defs>
+                  {/* Grid lines */}
+                  {[0, 1, 2, 3].map(i => (
+                    <line key={i} x1="0" y1={i * 27 + 10} x2="300" y2={i * 27 + 10}
+                      stroke="white" strokeOpacity="0.05" strokeWidth="0.5" />
+                  ))}
+                  {/* Area fill */}
+                  <motion.polygon
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1, delay: 0.6 }}
+                    points={`0,100 ${weeklyProgress.map((count: number, i: number) => {
+                      const x = i * 50;
+                      const y = maxWeekly > 0 ? 100 - (count / maxWeekly) * 80 : 100;
+                      return `${x},${y}`;
+                    }).join(' ')} 300,100`}
+                    fill="url(#dashAreaGrad)"
+                  />
+                  {/* Line */}
+                  <motion.polyline
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1.5, delay: 0.4 }}
+                    points={weeklyProgress.map((count: number, i: number) => {
+                      const x = i * 50;
+                      const y = maxWeekly > 0 ? 100 - (count / maxWeekly) * 80 : 100;
+                      return `${x},${y}`;
+                    }).join(' ')}
+                    fill="none"
+                    stroke="url(#dashLineGrad)"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <defs>
+                    <linearGradient id="dashLineGrad" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#a088ff" />
+                      <stop offset="100%" stopColor="#63e3ff" />
+                    </linearGradient>
+                  </defs>
+                  {/* Dots + count labels */}
+                  {weeklyProgress.map((count: number, i: number) => {
+                    const x = i * 50;
+                    const y = maxWeekly > 0 ? 100 - (count / maxWeekly) * 80 : 100;
+                    return (
+                      <g key={i}>
+                        <motion.circle
+                          initial={{ r: 0 }}
+                          animate={{ r: 3.5 }}
+                          transition={{ duration: 0.3, delay: 0.6 + i * 0.1 }}
+                          cx={x} cy={y}
+                          fill="#a088ff"
+                          stroke="#141414"
+                          strokeWidth="2"
+                        />
+                        {count > 0 && (
+                          <text x={x} y={y - 8} textAnchor="middle"
+                            fill="white" fillOpacity="0.6" fontSize="8"
+                            fontWeight="500"
+                          >{count}</text>
+                        )}
+                      </g>
+                    );
+                  })}
+                </svg>
+                {/* Day labels below */}
+                <div className="flex justify-between mt-1">
+                  {dayLabels.map((day: string, i: number) => (
+                    <span key={day + i} className="text-xs text-white/40 w-[50px] text-center">{day}</span>
+                  ))}
+                </div>
               </div>
             </motion.div>
 

@@ -330,7 +330,7 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
                             </div>
                         </motion.div>
 
-                        {/* Activity Graph */}
+                        {/* Activity Line Graph */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -344,21 +344,78 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
                                 </h3>
                                 <span className="text-sm text-white/40">Last 7 Days</span>
                             </div>
-                            <div className="flex items-end justify-between h-32 gap-4">
-                                {weeklyActivity.map((day: any, i: number) => (
-                                    <div key={i} className="flex flex-col items-center gap-2 flex-1 group">
-                                        <span className="text-xs text-white/40">{day.count > 0 ? day.count : ''}</span>
-                                        <div className="w-full bg-white/5 rounded-t-lg relative h-full flex items-end overflow-hidden">
-                                            <motion.div
-                                                initial={{ height: 0 }}
-                                                animate={{ height: day.count > 0 ? `${(day.count / maxActivity) * 100}%` : '0%' }}
-                                                transition={{ duration: 1, delay: 0.5 + (i * 0.1) }}
-                                                className={`w-full ${day.count > 0 ? 'bg-gradient-to-t from-[#63e3ff]/20 to-[#63e3ff] opacity-60 group-hover:opacity-100' : 'bg-white/5'} transition-opacity`}
-                                            />
-                                        </div>
-                                        <span className="text-xs text-white/40">{day.day}</span>
-                                    </div>
-                                ))}
+                            <div className="w-full h-40 relative">
+                                <svg viewBox="0 0 300 120" className="w-full h-full" preserveAspectRatio="none">
+                                    <defs>
+                                        <linearGradient id="heroAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#63e3ff" stopOpacity="0.3" />
+                                            <stop offset="100%" stopColor="#63e3ff" stopOpacity="0.02" />
+                                        </linearGradient>
+                                    </defs>
+                                    {/* Grid lines */}
+                                    {[0, 1, 2, 3].map(i => (
+                                        <line key={i} x1="0" y1={i * 30 + 10} x2="300" y2={i * 30 + 10}
+                                            stroke="white" strokeOpacity="0.05" strokeWidth="0.5" />
+                                    ))}
+                                    {/* Area fill */}
+                                    <motion.polygon
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ duration: 1, delay: 0.8 }}
+                                        points={`0,110 ${weeklyActivity.map((d: any, i: number) => {
+                                            const x = i * 50;
+                                            const y = maxActivity > 0 ? 110 - (d.count / maxActivity) * 90 : 110;
+                                            return `${x},${y}`;
+                                        }).join(' ')} 300,110`}
+                                        fill="url(#heroAreaGradient)"
+                                    />
+                                    {/* Line */}
+                                    <motion.polyline
+                                        initial={{ pathLength: 0, opacity: 0 }}
+                                        animate={{ pathLength: 1, opacity: 1 }}
+                                        transition={{ duration: 1.5, delay: 0.6 }}
+                                        points={weeklyActivity.map((d: any, i: number) => {
+                                            const x = i * 50;
+                                            const y = maxActivity > 0 ? 110 - (d.count / maxActivity) * 90 : 110;
+                                            return `${x},${y}`;
+                                        }).join(' ')}
+                                        fill="none"
+                                        stroke="#63e3ff"
+                                        strokeWidth="2.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
+                                    {/* Dots + labels */}
+                                    {weeklyActivity.map((d: any, i: number) => {
+                                        const x = i * 50;
+                                        const y = maxActivity > 0 ? 110 - (d.count / maxActivity) * 90 : 110;
+                                        return (
+                                            <g key={i}>
+                                                <motion.circle
+                                                    initial={{ r: 0 }}
+                                                    animate={{ r: 4 }}
+                                                    transition={{ duration: 0.3, delay: 0.8 + i * 0.1 }}
+                                                    cx={x} cy={y}
+                                                    fill="#63e3ff"
+                                                    stroke="#141414"
+                                                    strokeWidth="2"
+                                                />
+                                                {d.count > 0 && (
+                                                    <text x={x} y={y - 10} textAnchor="middle"
+                                                        fill="white" fillOpacity="0.6" fontSize="9"
+                                                        fontWeight="500"
+                                                    >{d.count}</text>
+                                                )}
+                                            </g>
+                                        );
+                                    })}
+                                </svg>
+                                {/* Day labels */}
+                                <div className="flex justify-between mt-2">
+                                    {weeklyActivity.map((d: any, i: number) => (
+                                        <span key={i} className="text-xs text-white/40 w-[50px] text-center">{d.day}</span>
+                                    ))}
+                                </div>
                             </div>
                         </motion.div>
                     </div>
