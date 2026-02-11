@@ -11,7 +11,11 @@ import LearningPath from '../models/LearningPath';
 import Topic from '../models/Topic';
 import Problem from '../models/Problem';
 
-import { roadmapCategories, topics, problems } from './seedData';
+import { roadmapCategories, topics } from './seedData';
+import { dsaProblems } from './data/dsa';
+import { algoProblems } from './data/algo';
+import { dpProblems } from './data/dp';
+import { graphProblems } from './data/graphs';
 
 const seedData = async () => {
     try {
@@ -45,16 +49,33 @@ const seedData = async () => {
         }));
         await Topic.insertMany(topicDocs);
 
-        console.log('Seeding Problems...');
-        // We need to map problems. The structure in seedData matches the model mostly, 
-        // except the model expects 'difficulty' as title case. seedData has uppercase? No, it has Title case 'Medium', 'Easy', 'Hard'.
-        // Let's check seedData... yes, 'Medium', 'Easy'.
-        // Check if any fields are missing or need mapping.
-        // Problem model: title, topic_id, difficulty, video_link, problem_link, description, tags, order_index
-        // seedData: same fields.
+        console.log('Seeding Problems from Extended Data...');
+        const allRawProblems = [
+            ...dsaProblems,
+            ...algoProblems,
+            ...dpProblems,
+            ...graphProblems
+        ];
+
+        // Map raw problems to full Problem documents with auto-generated links
+        const problems = allRawProblems.map((p, index) => {
+            const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+            return {
+                title: p.title,
+                topic_id: p.topic_id,
+                difficulty: p.difficulty,
+                tags: p.tags,
+                video_link: `https://www.youtube.com/results?search_query=${encodeURIComponent(p.title + ' leetcode solution')}`,
+                problem_link: `https://leetcode.com/problems/${slug}/`,
+                article_link: `https://takeuforward.org/${p.topic_id}/${slug}`, // Mock article link
+                description: `Practice problem: ${p.title}. Analyze the time and space complexity. Solved commonly using ${p.tags.join(', ')}.`,
+                order_index: index + 1
+            };
+        });
+
         await Problem.insertMany(problems);
 
-        console.log('Data Seeded Successfully!');
+        console.log(`Data Seeded Successfully! Inserted ${problems.length} problems.`);
         process.exit();
     } catch (error) {
         console.error('Error with data seeding', error);
