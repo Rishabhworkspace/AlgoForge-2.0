@@ -1,4 +1,4 @@
-import { } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Flame,
@@ -9,42 +9,106 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { topics } from '@/data/roadmaps';
+import { getAllProblems, getAllTopics } from '@/api/content';
+import { getUserProgress } from '@/api/userActions';
 import { toast } from 'sonner';
 
 interface DashboardProps {
   onNavigate: (view: 'home' | 'dashboard' | 'topic' | 'problems' | 'notes' | 'leaderboard', topicId?: string) => void;
 }
 
-// Mock data for demonstration
-const mockStats = {
-  totalSolved: 47,
-  totalProblems: 500,
-  easySolved: 25,
-  mediumSolved: 18,
-  hardSolved: 4,
-  currentStreak: 7,
-  longestStreak: 14,
-  xpPoints: 2350,
-  weeklyProgress: [3, 5, 2, 7, 4, 6, 8],
-  recentActivity: [
-    { problem: 'Two Sum', time: '2 hours ago', status: 'completed' },
-    { problem: 'Reverse Linked List', time: '5 hours ago', status: 'completed' },
-    { problem: 'Binary Tree Level Order', time: '1 day ago', status: 'completed' },
-  ]
-};
-
-const mockBadges = [
-  { id: 'b1', name: 'First Steps', icon: 'Footprints', earned: true },
-  { id: 'b2', name: 'Rising Star', icon: 'Star', earned: true },
-  { id: 'b3', name: 'Problem Solver', icon: 'Trophy', earned: false },
-  { id: 'b4', name: 'Streak Keeper', icon: 'Flame', earned: true },
-];
-
 export function Dashboard({ onNavigate }: DashboardProps) {
   const { profile } = useAuth();
 
-  const completionPercentage = Math.round((mockStats.totalSolved / mockStats.totalProblems) * 100);
+  const [problems, setProblems] = useState<any[]>([]);
+  const [topics, setTopics] = useState<any[]>([]);
+  const [userProgress, setUserProgress] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [problemsData, topicsData] = await Promise.all([
+          getAllProblems(),
+          getAllTopics()
+        ]);
+        setProblems(problemsData);
+        setTopics(topicsData);
+
+        try {
+          const progress = await getUserProgress();
+          setUserProgress(progress);
+        } catch (e) {
+          console.log("Failed to load progress (not logged in?)");
+        }
+      } catch (e) {
+        console.error("Failed to load dashboard data", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const stats = useMemo(() => {
+    const solvedProgress = userProgress.filter((p: any) => p.status === 'SOLVED');
+    const solvedIds = new Set(solvedProgress.map((p: any) => p.problem_id));
+
+    const totalSolved = solvedIds.size;
+    const totalProblems = problems.length;
+    const xpPoints = totalSolved * 25; // 25 XP per problem
+
+    let easy = 0, medium = 0, hard = 0;
+    problems.forEach((p: any) => {
+      if (solvedIds.has(p._id)) {
+        if (p.difficulty === 'Easy') easy++;
+        else if (p.difficulty === 'Medium') medium++;
+        else if (p.difficulty === 'Hard') hard++;
+      }
+    });
+
+    // Recent Activity
+    const recent = solvedProgress
+      .sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+      .slice(0, 3)
+      .map((p: any) => {
+        const prob = problems.find((prob: any) => prob._id === p.problem_id);
+        return {
+          problem: prob ? prob.title : 'Unknown Problem',
+          time: new Date(p.updatedAt).toLocaleDateString(), // Simplification
+          status: 'completed'
+        };
+      });
+
+    return {
+      totalSolved,
+      totalProblems,
+      xpPoints,
+      easySolved: easy,
+      mediumSolved: medium,
+      hardSolved: hard,
+      recentActivity: recent,
+      currentStreak: 0, // TODO: Implement streak logic backend side
+      longestStreak: 0
+    };
+  }, [problems, userProgress]);
+
+  // Mock for now
+  const weeklyProgress = [3, 5, 2, 7, 4, 6, 8];
+
+  const mockBadges = [
+    { id: 'b1', name: 'First Steps', icon: 'Footprints', earned: stats.totalSolved > 0 },
+    { id: 'b2', name: 'Rising Star', icon: 'Star', earned: stats.totalSolved >= 10 },
+    { id: 'b3', name: 'Problem Solver', icon: 'Trophy', earned: stats.totalSolved >= 50 },
+    { id: 'b4', name: 'Streak Keeper', icon: 'Flame', earned: false },
+  ];
+
+  const completionPercentage = stats.totalProblems > 0 ? Math.round((stats.totalSolved / stats.totalProblems) * 100) : 0;
+
+  if (loading) {
+    return <div className="min-h-screen pt-24 text-center text-white/60">Loading dashboard...</div>;
+  }
 
   return (
     <section className="relative min-h-screen pt-24 pb-12 overflow-hidden">
@@ -73,7 +137,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 px-4 py-2 rounded-full glass">
                 <Flame className="w-5 h-5 text-[#ff8a63] animate-flame" />
-                <span className="text-white font-medium">{mockStats.currentStreak} day streak</span>
+                <span className="text-white font-medium">{stats.currentStreak} day streak</span>
               </div>
             </div>
           </div>
@@ -93,8 +157,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               </div>
               <span className="text-white/60 text-sm">Solved</span>
             </div>
-            <p className="text-2xl font-bold text-white">{mockStats.totalSolved}</p>
-            <p className="text-xs text-white/40">of {mockStats.totalProblems} problems</p>
+            <p className="text-2xl font-bold text-white">{stats.totalSolved}</p>
+            <p className="text-xs text-white/40">of {stats.totalProblems} problems</p>
           </div>
 
           <div className="glass rounded-xl p-4">
@@ -104,8 +168,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               </div>
               <span className="text-white/60 text-sm">XP Points</span>
             </div>
-            <p className="text-2xl font-bold text-white">{mockStats.xpPoints}</p>
-            <p className="text-xs text-white/40">Level 12</p>
+            <p className="text-2xl font-bold text-white">{stats.xpPoints}</p>
+            <p className="text-xs text-white/40">Level {Math.floor(stats.xpPoints / 1000) + 1}</p>
           </div>
 
           <div className="glass rounded-xl p-4">
@@ -115,8 +179,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               </div>
               <span className="text-white/60 text-sm">Streak</span>
             </div>
-            <p className="text-2xl font-bold text-white">{mockStats.currentStreak}</p>
-            <p className="text-xs text-white/40">Best: {mockStats.longestStreak} days</p>
+            <p className="text-2xl font-bold text-white">{stats.currentStreak}</p>
+            <p className="text-xs text-white/40">Best: {stats.longestStreak} days</p>
           </div>
 
           <div className="glass rounded-xl p-4">
@@ -126,8 +190,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               </div>
               <span className="text-white/60 text-sm">Rank</span>
             </div>
-            <p className="text-2xl font-bold text-white">#42</p>
-            <p className="text-xs text-white/40">Top 5%</p>
+            <p className="text-2xl font-bold text-white">#--</p>
+            <p className="text-xs text-white/40">Top --%</p>
           </div>
         </motion.div>
 
@@ -159,19 +223,19 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#7ca700]/20 mb-2">
-                    <span className="text-[#7ca700] font-bold">{mockStats.easySolved}</span>
+                    <span className="text-[#7ca700] font-bold">{stats.easySolved}</span>
                   </div>
                   <p className="text-sm text-white/60">Easy</p>
                 </div>
                 <div className="text-center">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#ffc107]/20 mb-2">
-                    <span className="text-[#ffc107] font-bold">{mockStats.mediumSolved}</span>
+                    <span className="text-[#ffc107] font-bold">{stats.mediumSolved}</span>
                   </div>
                   <p className="text-sm text-white/60">Medium</p>
                 </div>
                 <div className="text-center">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#ff6347]/20 mb-2">
-                    <span className="text-[#ff6347] font-bold">{mockStats.hardSolved}</span>
+                    <span className="text-[#ff6347] font-bold">{stats.hardSolved}</span>
                   </div>
                   <p className="text-sm text-white/60">Hard</p>
                 </div>
@@ -191,7 +255,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   <div key={day} className="flex-1 flex flex-col items-center gap-2">
                     <motion.div
                       initial={{ height: 0 }}
-                      animate={{ height: `${(mockStats.weeklyProgress[index] / 10) * 100}%` }}
+                      animate={{ height: `${(weeklyProgress[index] / 10) * 100}%` }}
                       transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
                       className="w-full max-w-12 rounded-t-lg bg-gradient-to-t from-[#a088ff] to-[#63e3ff] min-h-[4px]"
                     />
@@ -210,7 +274,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             >
               <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
               <div className="space-y-3">
-                {mockStats.recentActivity.map((activity, index) => (
+                {stats.recentActivity.length > 0 ? stats.recentActivity.map((activity: any, index: number) => (
                   <div
                     key={index}
                     className="flex items-center justify-between p-3 rounded-xl bg-white/5"
@@ -226,7 +290,9 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                     </div>
                     <span className="text-xs text-[#7ca700]">+25 XP</span>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-white/40 text-sm">No recent activity.</p>
+                )}
               </div>
             </motion.div>
           </div>
@@ -254,8 +320,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                   <div
                     key={badge.id}
                     className={`p-3 rounded-xl text-center ${badge.earned
-                        ? 'bg-gradient-to-br from-[#a088ff]/20 to-[#63e3ff]/20'
-                        : 'bg-white/5 opacity-50'
+                      ? 'bg-gradient-to-br from-[#a088ff]/20 to-[#63e3ff]/20'
+                      : 'bg-white/5 opacity-50'
                       }`}
                   >
                     <div className={`w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center ${badge.earned ? 'bg-[#a088ff]/30' : 'bg-white/10'
@@ -298,12 +364,12 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                           <div
                             className="h-full rounded-full"
                             style={{
-                              width: '30%',
+                              width: '0%', // Calculate real progress if possible
                               background: topic.color
                             }}
                           />
                         </div>
-                        <span className="text-xs text-white/40">30%</span>
+                        <span className="text-xs text-white/40">--%</span>
                       </div>
                     </div>
                     <ArrowRight className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />

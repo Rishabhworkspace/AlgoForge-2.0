@@ -33,7 +33,12 @@ const steps = [
   }
 ];
 
-export function HowItWorks() {
+
+interface HowItWorksProps {
+  onGetStarted?: () => void;
+}
+
+export function HowItWorks({ onGetStarted }: HowItWorksProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -46,7 +51,7 @@ export function HowItWorks() {
     <section ref={containerRef} id="how-it-works" className="relative py-24 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 grid-pattern opacity-20" />
-      
+
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -60,7 +65,7 @@ export function HowItWorks() {
             How It <span className="gradient-text">Works</span>
           </h2>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            Start your coding journey in four simple steps. 
+            Start your coding journey in four simple steps.
             Our structured approach ensures you learn effectively.
           </p>
         </motion.div>
@@ -68,7 +73,7 @@ export function HowItWorks() {
         {/* Steps */}
         <div className="relative">
           {/* Connecting Line - Desktop */}
-          <svg 
+          <svg
             className="absolute left-1/2 top-0 h-full w-2 -translate-x-1/2 hidden lg:block"
             viewBox="0 0 2 100"
             preserveAspectRatio="none"
@@ -99,21 +104,20 @@ export function HowItWorks() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: '-100px' }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className={`relative flex flex-col lg:flex-row items-center gap-8 ${
-                  index % 2 === 1 ? 'lg:flex-row-reverse' : ''
-                }`}
+                className={`relative flex flex-col lg:flex-row items-center gap-8 ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''
+                  }`}
               >
                 {/* Content Card */}
                 <div className={`flex-1 ${index % 2 === 0 ? 'lg:text-right' : 'lg:text-left'}`}>
                   <div className="glass rounded-2xl p-6 sm:p-8 inline-block max-w-lg">
                     <div className={`flex items-center gap-4 mb-4 ${index % 2 === 0 ? 'lg:flex-row-reverse' : ''}`}>
-                      <div 
+                      <div
                         className="w-12 h-12 rounded-xl flex items-center justify-center"
                         style={{ background: `${step.color}20` }}
                       >
                         <step.icon className="w-6 h-6" style={{ color: step.color }} />
                       </div>
-                      <span 
+                      <span
                         className="font-display text-4xl"
                         style={{ color: step.color }}
                       >
@@ -134,7 +138,7 @@ export function HowItWorks() {
                   <motion.div
                     whileHover={{ scale: 1.2 }}
                     className="w-16 h-16 rounded-full flex items-center justify-center z-10 relative"
-                    style={{ 
+                    style={{
                       background: `linear-gradient(135deg, ${step.color}, ${step.color}80)`,
                       boxShadow: `0 0 30px ${step.color}50`
                     }}
@@ -166,7 +170,10 @@ export function HowItWorks() {
           className="mt-20 text-center"
         >
           <p className="text-white/60 mb-4">Ready to start your journey?</p>
-          <button className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#a088ff] to-[#63e3ff] text-[#141414] font-medium hover:opacity-90 transition-opacity">
+          <button
+            onClick={onGetStarted}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#a088ff] to-[#63e3ff] text-[#141414] font-medium hover:opacity-90 transition-opacity"
+          >
             Get Started Now
             <TrendingUp className="w-5 h-5" />
           </button>

@@ -28,7 +28,13 @@ app.use('/api/users', authRoutes);
 app.use('/api/users', userRoutes);
 
 import infoRoutes from './routes/infoRoutes';
+import contentRoutes from './routes/contentRoutes';
+
+import userActionRoutes from './routes/userActionRoutes';
+
 app.use('/api/info', infoRoutes);
+app.use('/api/content', contentRoutes);
+app.use('/api/user-actions', userActionRoutes);
 
 app.get('/', (req: Request, res: Response) => {
     res.send('AlgoForge API is running');

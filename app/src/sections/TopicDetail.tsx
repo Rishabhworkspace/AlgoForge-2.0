@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -11,7 +11,8 @@ import {
   Search,
   FileText
 } from 'lucide-react';
-import { getTopicById, getProblemsByTopic } from '@/data/roadmaps';
+import { getTopicById, getProblemsByTopic } from '@/api/content';
+import { updateProblemStatus, toggleBookmark as apiToggleBookmark, getUserProgress } from '@/api/userActions';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
@@ -21,12 +22,62 @@ interface TopicDetailProps {
 }
 
 export function TopicDetail({ topicId, onBack }: TopicDetailProps) {
-  const topic = getTopicById(topicId);
-  const problems = getProblemsByTopic(topicId);
+  const [topic, setTopic] = useState<any>(null);
+  const [problems, setProblems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState<'all' | 'Easy' | 'Medium' | 'Hard'>('all');
   const [completedProblems, setCompletedProblems] = useState<Set<string>>(new Set());
   const [bookmarkedProblems, setBookmarkedProblems] = useState<Set<string>>(new Set());
+
+  // Load data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [topicData, problemsData] = await Promise.all([
+          getTopicById(topicId),
+          getProblemsByTopic(topicId)
+        ]);
+        setTopic(topicData);
+        setProblems(problemsData);
+
+        // Load user progress
+        try {
+          const progressData = await getUserProgress();
+          const completed = new Set<string>();
+          const bookmarked = new Set<string>();
+
+          progressData.forEach((p: any) => {
+            if (p.status === 'SOLVED') completed.add(p.problem_id);
+            if (p.is_bookmarked) bookmarked.add(p.problem_id);
+          });
+          setCompletedProblems(completed);
+          setBookmarkedProblems(bookmarked);
+        } catch (err) {
+          // User might not be logged in, ignore
+        }
+
+      } catch (e) {
+        console.error("Failed to load topic details", e);
+        toast.error("Failed to load topic");
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (topicId) {
+      fetchData();
+    }
+  }, [topicId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-24 flex items-center justify-center">
+        <p className="text-white/60">Loading topic...</p>
+      </div>
+    );
+  }
 
   if (!topic) {
     return (
@@ -37,40 +88,70 @@ export function TopicDetail({ topicId, onBack }: TopicDetailProps) {
   }
 
   const filteredProblems = problems.filter(problem => {
+    // problem.tags might be undefined in some cases if db is messy, check optional
+    const tags = problem.tags || [];
     const matchesSearch = problem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      problem.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesDifficulty = difficultyFilter === 'all' || problem.difficulty === difficultyFilter;
     return matchesSearch && matchesDifficulty;
   });
 
-  const toggleComplete = (problemId: string) => {
+  const toggleComplete = async (_problemId: string, problemMongoId: string) => {
+    // Optimistic update
+    const wasCompleted = completedProblems.has(problemMongoId);
     setCompletedProblems(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(problemId)) {
-        newSet.delete(problemId);
+      if (wasCompleted) {
+        newSet.delete(problemMongoId);
       } else {
-        newSet.add(problemId);
-        toast.success('Problem marked as complete! +25 XP');
+        newSet.add(problemMongoId);
       }
       return newSet;
     });
+
+    try {
+      await updateProblemStatus(problemMongoId, wasCompleted ? 'TODO' : 'SOLVED');
+      if (!wasCompleted) toast.success('Problem marked as complete! +25 XP');
+    } catch (e) {
+      // Revert
+      setCompletedProblems(prev => {
+        const newSet = new Set(prev);
+        if (wasCompleted) newSet.add(problemMongoId);
+        else newSet.delete(problemMongoId);
+        return newSet;
+      });
+      toast.error('Failed to update status. Please log in.');
+    }
   };
 
-  const toggleBookmark = (problemId: string) => {
+  const toggleBookmark = async (_problemId: string, problemMongoId: string) => {
+    const wasBookmarked = bookmarkedProblems.has(problemMongoId);
     setBookmarkedProblems(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(problemId)) {
-        newSet.delete(problemId);
-        toast.info('Bookmark removed');
+      if (wasBookmarked) {
+        newSet.delete(problemMongoId);
       } else {
-        newSet.add(problemId);
-        toast.success('Problem bookmarked');
+        newSet.add(problemMongoId);
       }
       return newSet;
     });
+
+    try {
+      await apiToggleBookmark(problemMongoId);
+      if (wasBookmarked) toast.info('Bookmark removed');
+      else toast.success('Problem bookmarked');
+    } catch (e) {
+      setBookmarkedProblems(prev => {
+        const newSet = new Set(prev);
+        if (wasBookmarked) newSet.add(problemMongoId);
+        else newSet.delete(problemMongoId);
+        return newSet;
+      });
+      toast.error('Failed to update bookmark. Please log in.');
+    }
   };
 
-  const progress = Math.round((completedProblems.size / problems.length) * 100);
+  const progress = problems.length > 0 ? Math.round((completedProblems.size / problems.length) * 100) : 0;
 
   return (
     <section className="relative min-h-screen pt-24 pb-12 overflow-hidden">
@@ -159,8 +240,8 @@ export function TopicDetail({ topicId, onBack }: TopicDetailProps) {
                 key={diff}
                 onClick={() => setDifficultyFilter(diff)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${difficultyFilter === diff
-                    ? 'bg-white/20 text-white'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                  ? 'bg-white/20 text-white'
+                  : 'bg-white/5 text-white/60 hover:bg-white/10'
                   }`}
               >
                 {diff === 'all' ? 'All' : diff}
@@ -176,13 +257,14 @@ export function TopicDetail({ topicId, onBack }: TopicDetailProps) {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-3"
         >
-          {filteredProblems.map((problem, index) => {
-            const isCompleted = completedProblems.has(problem.id);
-            const isBookmarked = bookmarkedProblems.has(problem.id);
+          {filteredProblems.map((problem: any, index: number) => {
+            const problemMongoId = problem._id;
+            const isCompleted = completedProblems.has(problemMongoId);
+            const isBookmarked = bookmarkedProblems.has(problemMongoId);
 
             return (
               <motion.div
-                key={problem.id}
+                key={problemMongoId}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
@@ -192,7 +274,7 @@ export function TopicDetail({ topicId, onBack }: TopicDetailProps) {
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   {/* Completion Toggle */}
                   <button
-                    onClick={() => toggleComplete(problem.id)}
+                    onClick={() => toggleComplete(problem.id, problemMongoId)}
                     className="flex-shrink-0"
                   >
                     {isCompleted ? (
@@ -213,7 +295,7 @@ export function TopicDetail({ topicId, onBack }: TopicDetailProps) {
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      {problem.tags.map((tag) => (
+                      {(problem.tags || []).map((tag: string) => (
                         <span
                           key={tag}
                           className="px-2 py-0.5 rounded-full bg-white/5 text-white/50 text-xs"
@@ -251,10 +333,10 @@ export function TopicDetail({ topicId, onBack }: TopicDetailProps) {
                     )}
 
                     <button
-                      onClick={() => toggleBookmark(problem.id)}
+                      onClick={() => toggleBookmark(problem.id, problemMongoId)}
                       className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${isBookmarked
-                          ? 'bg-[#ffd700]/20'
-                          : 'bg-white/5 hover:bg-[#ffd700]/10'
+                        ? 'bg-[#ffd700]/20'
+                        : 'bg-white/5 hover:bg-[#ffd700]/10'
                         }`}
                       title="Bookmark"
                     >

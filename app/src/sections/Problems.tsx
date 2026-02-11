@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Search, 
-  Play, 
-  ExternalLink, 
-  Bookmark, 
-  CheckCircle2, 
+import {
+  Search,
+  Play,
+  ExternalLink,
+  Bookmark,
+  CheckCircle2,
   Circle,
   FileText,
   Tag,
@@ -14,34 +14,77 @@ import {
   BarChart3,
   ChevronDown
 } from 'lucide-react';
-import { problems as allProblems, topics } from '@/data/roadmaps';
+import { getAllProblems, getAllTopics } from '@/api/content';
+import { updateProblemStatus, toggleBookmark as apiToggleBookmark, getUserProgress } from '@/api/userActions';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 export function Problems() {
+  const [allProblems, setProblems] = useState<any[]>([]);
+  const [topics, setTopics] = useState<any[]>([]);
+  const [filtersLoading, setFiltersLoading] = useState(true);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState<'all' | 'Easy' | 'Medium' | 'Hard'>('all');
   const [tagFilter, setTagFilter] = useState<string>('all');
   const [completedProblems, setCompletedProblems] = useState<Set<string>>(new Set());
   const [bookmarkedProblems, setBookmarkedProblems] = useState<Set<string>>(new Set());
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setFiltersLoading(true);
+        const [problemsData, topicsData] = await Promise.all([
+          getAllProblems(),
+          getAllTopics()
+        ]);
+        setProblems(problemsData);
+        setTopics(topicsData);
+
+        // Fetch user progress
+        try {
+          const progressData = await getUserProgress();
+          const completed = new Set<string>();
+          const bookmarked = new Set<string>();
+          progressData.forEach((p: any) => {
+            if (p.status === 'SOLVED') completed.add(p.problem_id);
+            if (p.is_bookmarked) bookmarked.add(p.problem_id);
+          });
+          setCompletedProblems(completed);
+          setBookmarkedProblems(bookmarked);
+        } catch (err) {
+          // Ignore if not logged in
+        }
+      } catch (e) {
+        console.error(e);
+        toast.error("Failed to load problems");
+      } finally {
+        setFiltersLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   // Get all unique tags
   const allTags = useMemo(() => {
     const tags = new Set<string>();
-    allProblems.forEach(p => p.tags.forEach(t => tags.add(t)));
+    allProblems.forEach(p => {
+      if (p.tags) p.tags.forEach((t: string) => tags.add(t));
+    });
     return Array.from(tags).sort();
-  }, []);
+  }, [allProblems]);
 
   // Filter problems
   const filteredProblems = useMemo(() => {
     return allProblems.filter(problem => {
+      const tags = problem.tags || [];
       const matchesSearch = problem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           problem.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesDifficulty = difficultyFilter === 'all' || problem.difficulty === difficultyFilter;
-      const matchesTag = tagFilter === 'all' || problem.tags.includes(tagFilter);
+      const matchesTag = tagFilter === 'all' || tags.includes(tagFilter);
       return matchesSearch && matchesDifficulty && matchesTag;
     });
-  }, [searchQuery, difficultyFilter, tagFilter]);
+  }, [searchQuery, difficultyFilter, tagFilter, allProblems]);
 
   // Stats
   const stats = {
@@ -51,32 +94,63 @@ export function Problems() {
     hard: allProblems.filter(p => p.difficulty === 'Hard').length,
   };
 
-  const toggleComplete = (problemId: string) => {
+  const toggleComplete = async (_problemId: string, problemMongoId: string) => {
+    const wasCompleted = completedProblems.has(problemMongoId);
     setCompletedProblems(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(problemId)) {
-        newSet.delete(problemId);
+      if (wasCompleted) {
+        newSet.delete(problemMongoId);
       } else {
-        newSet.add(problemId);
-        toast.success('Problem marked as complete! +25 XP');
+        newSet.add(problemMongoId);
       }
       return newSet;
     });
+
+    try {
+      await updateProblemStatus(problemMongoId, wasCompleted ? 'TODO' : 'SOLVED');
+      if (!wasCompleted) toast.success('Problem marked as complete! +25 XP');
+    } catch (e) {
+      setCompletedProblems(prev => {
+        const newSet = new Set(prev);
+        if (wasCompleted) newSet.add(problemMongoId);
+        else newSet.delete(problemMongoId);
+        return newSet;
+      });
+      toast.error('Failed to update status. Please log in.');
+    }
   };
 
-  const toggleBookmark = (problemId: string) => {
+  const toggleBookmark = async (_problemId: string, problemMongoId: string) => {
+    const wasBookmarked = bookmarkedProblems.has(problemMongoId);
     setBookmarkedProblems(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(problemId)) {
-        newSet.delete(problemId);
-        toast.info('Bookmark removed');
+      if (wasBookmarked) {
+        newSet.delete(problemMongoId);
       } else {
-        newSet.add(problemId);
-        toast.success('Problem bookmarked');
+        newSet.add(problemMongoId);
       }
       return newSet;
     });
+
+    try {
+      await apiToggleBookmark(problemMongoId);
+      if (wasBookmarked) toast.info('Bookmark removed');
+      else toast.success('Problem bookmarked');
+    } catch (e) {
+      setBookmarkedProblems(prev => {
+        const newSet = new Set(prev);
+        if (wasBookmarked) newSet.add(problemMongoId);
+        else newSet.delete(problemMongoId);
+        return newSet;
+      });
+      toast.error('Failed to update bookmark. Please log in.');
+    }
   };
+
+  // If initial load
+  if (filtersLoading && allProblems.length === 0) {
+    return <div className="min-h-screen pt-24 pb-12 text-center text-white/60">Loading problems...</div>;
+  }
 
   return (
     <section className="relative min-h-screen pt-24 pb-12 overflow-hidden">
@@ -174,11 +248,10 @@ export function Problems() {
                 <button
                   key={diff}
                   onClick={() => setDifficultyFilter(diff)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    difficultyFilter === diff
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${difficultyFilter === diff
                       ? 'bg-white/20 text-white'
                       : 'bg-white/5 text-white/60 hover:bg-white/10'
-                  }`}
+                    }`}
                 >
                   {diff === 'all' ? 'All' : diff}
                 </button>
@@ -220,25 +293,25 @@ export function Problems() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="grid gap-3"
         >
-          {filteredProblems.map((problem, index) => {
-            const isCompleted = completedProblems.has(problem.id);
-            const isBookmarked = bookmarkedProblems.has(problem.id);
+          {filteredProblems.map((problem: any, index: number) => {
+            const problemMongoId = problem._id;
+            const isCompleted = completedProblems.has(problemMongoId);
+            const isBookmarked = bookmarkedProblems.has(problemMongoId);
             const topic = topics.find(t => t.id === problem.topic_id);
 
             return (
               <motion.div
-                key={problem.id}
+                key={problemMongoId}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.02 }}
-                className={`glass rounded-xl p-4 sm:p-5 transition-all hover:bg-white/5 ${
-                  isCompleted ? 'border-[#7ca700]/30' : ''
-                }`}
+                className={`glass rounded-xl p-4 sm:p-5 transition-all hover:bg-white/5 ${isCompleted ? 'border-[#7ca700]/30' : ''
+                  }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   {/* Completion Toggle */}
                   <button
-                    onClick={() => toggleComplete(problem.id)}
+                    onClick={() => toggleComplete(problem.id, problemMongoId)}
                     className="flex-shrink-0"
                   >
                     {isCompleted ? (
@@ -258,9 +331,9 @@ export function Problems() {
                         {problem.difficulty}
                       </span>
                       {topic && (
-                        <span 
+                        <span
                           className="px-2 py-0.5 rounded text-xs"
-                          style={{ 
+                          style={{
                             background: `${topic.color}20`,
                             color: topic.color
                           }}
@@ -270,8 +343,8 @@ export function Problems() {
                       )}
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      {problem.tags.map((tag) => (
-                        <span 
+                      {(problem.tags || []).map((tag: string) => (
+                        <span
                           key={tag}
                           className="px-2 py-0.5 rounded-full bg-white/5 text-white/50 text-xs flex items-center gap-1"
                         >
@@ -309,12 +382,11 @@ export function Problems() {
                     )}
 
                     <button
-                      onClick={() => toggleBookmark(problem.id)}
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                        isBookmarked 
-                          ? 'bg-[#ffd700]/20' 
+                      onClick={() => toggleBookmark(problem.id, problemMongoId)}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${isBookmarked
+                          ? 'bg-[#ffd700]/20'
                           : 'bg-white/5 hover:bg-[#ffd700]/10'
-                      }`}
+                        }`}
                       title="Bookmark"
                     >
                       <Bookmark className={`w-5 h-5 ${isBookmarked ? 'text-[#ffd700] fill-[#ffd700]' : 'text-white/60'}`} />

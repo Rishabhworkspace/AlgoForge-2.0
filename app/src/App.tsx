@@ -15,11 +15,12 @@ import { TopicDetail } from '@/sections/TopicDetail';
 import { Problems } from '@/sections/Problems';
 import { Notes } from '@/sections/Notes';
 import { Leaderboard } from '@/sections/Leaderboard';
+import { TestimonialsPage } from '@/sections/TestimonialsPage';
 import { AuthModal } from '@/components/custom/AuthModal';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 
-type View = 'home' | 'dashboard' | 'topic' | 'problems' | 'notes' | 'leaderboard';
+type View = 'home' | 'dashboard' | 'topic' | 'problems' | 'notes' | 'leaderboard' | 'testimonials';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -42,12 +43,7 @@ function AppContent() {
           if (user) {
             setCurrentView('dashboard');
           } else {
-            // If trying to access protected route without user, maybe redirect or show login? 
-            // For now, let's just stay on home or current view, or ideally redirect to home.
-            // But the original logic just checked `&& user`. 
-            // Let's keep it simple: if user is not there, we don't switch to dashboard.
-            // But wait, if they click back to dashboard from a public page, and they are not logged in, they shouldn't go there.
-            window.location.hash = ''; // Clear hash if unauthorized?
+            window.location.hash = '';
             setCurrentView('home');
           }
         } else if (hash === 'problems') {
@@ -61,22 +57,18 @@ function AppContent() {
           }
         } else if (hash === 'leaderboard') {
           setCurrentView('leaderboard');
+        } else if (hash === 'testimonials') {
+          setCurrentView('testimonials');
         } else {
-          // Unknown hash, or standard view mapping
-          // e.g. #home -> home
           setCurrentView('home');
         }
       } else {
-        // No hash -> Home
         setCurrentView('home');
         setSelectedTopicId(null);
       }
     };
 
-    // Initial check
     handleHashChange();
-
-    // Listen for hash changes
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [user]);
@@ -94,10 +86,10 @@ function AppContent() {
   };
 
   const handleNavigate = (view: View, topicId?: string) => {
-    if ((view === 'dashboard' || view === 'notes') && !user) {
+    if ((view === 'dashboard' || view === 'notes' || (view === 'topic' && topicId)) && !user) {
       setAuthMode('login');
       setIsAuthModalOpen(true);
-      toast.info('Please sign in to access this feature');
+      toast.info('Please log in to continue');
       return;
     }
 
@@ -139,20 +131,23 @@ function AppContent() {
         return <Notes />;
       case 'leaderboard':
         return <Leaderboard />;
+      case 'testimonials':
+        return <TestimonialsPage onBack={() => handleNavigate('home')} />;
       case 'home':
       default:
         return user ? (
           <>
             <UserHero user={user} onTopicClick={handleTopicClick} />
             <Roadmaps onTopicClick={handleTopicClick} />
+            <Testimonials onNavigate={handleNavigate} />
           </>
         ) : (
           <>
             <Hero onGetStarted={() => handleAuthClick('signup')} />
             <Roadmaps onTopicClick={handleTopicClick} />
             <Features />
-            <HowItWorks />
-            <Testimonials />
+            <HowItWorks onGetStarted={() => handleAuthClick('signup')} />
+            <Testimonials onNavigate={handleNavigate} />
             <CTA onGetStarted={() => handleAuthClick('signup')} />
           </>
         );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Binary,
@@ -10,7 +10,7 @@ import {
   ArrowRight,
   PlayCircle
 } from 'lucide-react';
-import { roadmapCategories, getTopicsByCategory } from '@/data/roadmaps';
+import { getLearningPaths, getTopicsByPath } from '@/api/content';
 import { useStats } from '@/hooks/useStats';
 
 interface RoadmapsProps {
@@ -29,6 +29,31 @@ const iconMap: Record<string, React.ElementType> = {
 export function Roadmaps({ onTopicClick }: RoadmapsProps) {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const { problemCount, videoCount, roadmapCount, userCount } = useStats();
+
+  const [categories, setCategories] = useState<any[]>([]);
+  const [topicsMap, setTopicsMap] = useState<Record<string, any[]>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const paths = await getLearningPaths();
+        setCategories(paths);
+
+        const topicsData: Record<string, any[]> = {};
+        await Promise.all(paths.map(async (path: any) => {
+          const pathTopics = await getTopicsByPath(path.id);
+          topicsData[path.id] = pathTopics;
+        }));
+        setTopicsMap(topicsData);
+      } catch (e) {
+        console.error("Failed to load roadmaps", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -51,6 +76,10 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
       }
     }
   };
+
+  if (loading) {
+    return <div className="py-24 text-center text-white/60">Loading roadmaps...</div>;
+  }
 
   return (
     <section id="roadmaps" className="relative py-24 overflow-hidden">
@@ -83,10 +112,10 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
           viewport={{ once: true }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {roadmapCategories.map((category) => {
+          {categories.map((category) => {
             const Icon = iconMap[category.icon] || Binary;
-            const topics = getTopicsByCategory(category.id);
-            const totalProblems = topics.reduce((sum, t) => sum + t.total_problems, 0);
+            const topics = topicsMap[category.id] || [];
+            const totalProblems = category.totalProblems || 0;
 
             return (
               <motion.div
@@ -164,7 +193,7 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
 
                     {/* Topics Preview */}
                     <div className="space-y-2">
-                      {topics.slice(0, 3).map((topic) => (
+                      {topics.slice(0, 3).map((topic: any) => (
                         <div
                           key={topic.id}
                           className="flex items-center gap-2 text-sm text-white/60"

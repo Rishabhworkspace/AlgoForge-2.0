@@ -1,8 +1,8 @@
 
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Quote, Star } from 'lucide-react';
-import { useStats } from '@/hooks/useStats';
+import { Quote, Star, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const testimonials = [
   {
@@ -52,9 +52,12 @@ const testimonials = [
   }
 ];
 
-export function Testimonials() {
+interface TestimonialsProps {
+  onNavigate?: (view: any) => void;
+}
+
+export function Testimonials({ onNavigate }: TestimonialsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { userCount, problemCount } = useStats();
 
   return (
     <section id="testimonials" className="relative py-24 overflow-hidden">
@@ -131,26 +134,23 @@ export function Testimonials() {
           </motion.div>
         </div>
 
-        {/* Stats */}
+        {/* Read More Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center"
+          className="mt-16 text-center"
         >
-          <div>
-            <p className="text-3xl sm:text-4xl font-bold text-[#a088ff] mb-1">4.9</p>
-            <p className="text-sm text-white/60">Average Rating</p>
-          </div>
-          <div>
-            <p className="text-3xl sm:text-4xl font-bold text-[#63e3ff] mb-1">{userCount}</p>
-            <p className="text-sm text-white/60">Happy Learners</p>
-          </div>
-          <div>
-            <p className="text-3xl sm:text-4xl font-bold text-[#ff8a63] mb-1">{problemCount}</p>
-            <p className="text-sm text-white/60">Success Stories</p>
-          </div>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => onNavigate && onNavigate('testimonials')}
+            className="border-white/10 text-white hover:bg-white/5 hover:text-[#a088ff] transition-colors"
+          >
+            Read More Success Stories
+            <ArrowRight className="ml-2 w-4 h-4" />
+          </Button>
         </motion.div>
       </div>
     </section>

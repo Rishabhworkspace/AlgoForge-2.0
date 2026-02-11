@@ -1,20 +1,24 @@
+
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useStats } from '@/hooks/useStats';
 
 interface CTAProps {
   onGetStarted: () => void;
 }
 
 export function CTA({ onGetStarted }: CTAProps) {
+  const { userCount } = useStats();
+
   return (
     <section className="relative py-24 overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 isometric-pattern opacity-30" />
-      
+
       {/* Animated Gradient */}
       <motion.div
-        animate={{ 
+        animate={{
           scale: [1, 1.2, 1],
           opacity: [0.3, 0.5, 0.3]
         }}
@@ -28,18 +32,18 @@ export function CTA({ onGetStarted }: CTAProps) {
           <motion.div
             key={i}
             initial={{ x: '-100%', opacity: 0 }}
-            animate={{ 
-              x: '200%', 
+            animate={{
+              x: '200%',
               opacity: [0, 0.5, 0]
             }}
-            transition={{ 
+            transition={{
               duration: 2 + Math.random() * 2,
               repeat: Infinity,
               delay: Math.random() * 2,
               ease: 'linear'
             }}
             className="absolute h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"
-            style={{ 
+            style={{
               top: `${Math.random() * 100}%`,
               width: `${100 + Math.random() * 200}px`
             }}
@@ -57,7 +61,7 @@ export function CTA({ onGetStarted }: CTAProps) {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8"
         >
           <Sparkles className="w-4 h-4 text-[#a088ff]" />
-          <span className="text-sm text-white/80">Join 10,000+ learners today</span>
+          <span className="text-sm text-white/80">Join {userCount} learners today</span>
         </motion.div>
 
         {/* Heading */}
@@ -80,7 +84,7 @@ export function CTA({ onGetStarted }: CTAProps) {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto mb-10"
         >
-          Start learning for free. No credit card required. 
+          Start learning for free. No credit card required.
           Get access to 500+ problems, video solutions, and structured roadmaps.
         </motion.p>
 
