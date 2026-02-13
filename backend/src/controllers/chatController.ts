@@ -3,23 +3,18 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Problem from '../models/Problem';
 import Topic from '../models/Topic';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-
 const SYSTEM_PROMPT = `You are AlgoBot, a friendly and expert AI tutor for Data Structures & Algorithms on the AlgoForge platform.
 
 Your capabilities:
 1. **Teach DSA Topics**: Explain concepts clearly with examples, pseudocode, and complexity analysis.
-2. **Suggest Practice Problems**: When relevant, recommend specific problems from the AlgoForge catalog (provided below). Always include the problem title and its link.
+2. **Suggest Practice Problems**: When relevant, recommend specific problems from the AlgoForge catalog.
 3. **Help Debug Approaches**: Help users think through their approach to solving problems.
-4. **Motivate Learners**: Be encouraging and supportive. Use a warm, professional tone.
 
 Rules:
-- Keep responses concise but thorough. Use bullet points and code blocks when helpful.
+- Keep responses concise but thorough.
 - When suggesting problems, format them as: **[Problem Title](link)** (Difficulty)
 - If a user asks about a topic, first explain the concept briefly, then suggest 3-5 relevant practice problems from the catalog.
-- If you don't have relevant problems in the catalog for a topic, say so and still teach the concept.
-- Always format code in proper markdown code blocks with language specified.
-- Never make up problems that aren't in the catalog below.
+- Always format code in proper markdown code blocks.
 `;
 
 export const chat = async (req: Request, res: Response) => {
@@ -30,43 +25,39 @@ export const chat = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'Message is required' });
         }
 
-        if (!process.env.GEMINI_API_KEY) {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
             return res.status(500).json({ error: 'Gemini API key not configured' });
         }
 
-        // Fetch problems from DB to give context to the AI
+        const genAI = new GoogleGenerativeAI(apiKey);
+
+        // Fetch problems and build catalog
         const problems = await Problem.find({}, 'title topic_id difficulty tags problem_link').lean();
         const topics = await Topic.find({}, 'id title').lean();
-
-        // Build a compact problem catalog string
         const topicMap = new Map(topics.map(t => [t.id, t.title]));
+
         const catalogLines = problems.map(p => {
             const topicName = topicMap.get(p.topic_id) || p.topic_id;
-            return `- ${p.title} | ${topicName} | ${p.difficulty} | Tags: ${p.tags.join(', ')} | ${p.problem_link}`;
+            return `- ${p.title} | ${topicName} | ${p.difficulty} | Link: ${p.problem_link}`;
         });
 
-        const fullSystemPrompt = `${SYSTEM_PROMPT}\n\n## AlgoForge Problem Catalog (${problems.length} problems)\n${catalogLines.join('\n')}`;
+        const fullSystemPrompt = `${SYSTEM_PROMPT}\n\n## PROBLEM CATALOG:\n${catalogLines.join('\n')}`;
 
-        // Build conversation history for Gemini
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        // Use native systemInstruction support
+        const model = genAI.getGenerativeModel({
+            model: 'gemini-1.5-flash',
+            systemInstruction: fullSystemPrompt,
+        });
 
+        // Map history to Gemini format
         const chatHistory = (history || []).map((msg: { role: string; content: string }) => ({
             role: msg.role === 'user' ? 'user' : 'model',
             parts: [{ text: msg.content }],
         }));
 
         const chatSession = model.startChat({
-            history: [
-                {
-                    role: 'user',
-                    parts: [{ text: 'System instructions: ' + fullSystemPrompt }],
-                },
-                {
-                    role: 'model',
-                    parts: [{ text: 'Understood! I am AlgoBot, ready to help you master DSA. How can I help you today?' }],
-                },
-                ...chatHistory,
-            ],
+            history: chatHistory,
         });
 
         const result = await chatSession.sendMessage(message);
@@ -74,10 +65,19 @@ export const chat = async (req: Request, res: Response) => {
 
         res.json({ reply: response });
     } catch (error: any) {
-        console.error('Chat error:', error);
+        console.error('Gemini Chat Error:', error);
+        // Clean up error message for frontend
+        const detailedError = error.message || error.toString();
+
+        // Check for common issues
+        let userMessage = 'Failed to get AI response';
+        if (detailedError.includes('API key')) userMessage = 'Invalid API Key';
+        if (detailedError.includes('quota')) userMessage = 'Rate limit exceeded';
+        if (detailedError.includes('location')) userMessage = 'Gemini not available in your region';
+
         res.status(500).json({
-            error: 'Failed to get AI response',
-            details: error.message || 'Unknown error',
+            error: userMessage,
+            details: detailedError // Send full details for debugging
         });
     }
 };

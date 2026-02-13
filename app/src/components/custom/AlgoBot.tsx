@@ -100,8 +100,11 @@ export function AlgoBot({ onAuthClick }: { onAuthClick: (mode: 'login' | 'signup
             const reply = await sendChatMessage(text.trim(), historyForAPI, token);
             setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
         } catch (error: any) {
-            const errMsg = error?.response?.data?.error || 'Sorry, something went wrong. Please try again.';
-            setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ ${errMsg}` }]);
+            const errorData = error?.response?.data;
+            const mainError = errorData?.error || 'Sorry, something went wrong.';
+            const details = errorData?.details ? `\n\n🔍 Debug: ${errorData.details}` : '';
+
+            setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ **${mainError}**${details}` }]);
         } finally {
             setIsTyping(false);
         }
@@ -239,8 +242,8 @@ export function AlgoBot({ onAuthClick }: { onAuthClick: (mode: 'login' | 'signup
                                     {/* Bubble */}
                                     <div
                                         className={`max-w-[80%] px-4 py-3 text-[13px] leading-relaxed ${msg.role === 'user'
-                                                ? 'bg-[#a088ff] text-white rounded-2xl rounded-tr-sm'
-                                                : 'bg-[#1e1e2d] text-gray-200 border border-white/5 rounded-2xl rounded-tl-sm'
+                                            ? 'bg-[#a088ff] text-white rounded-2xl rounded-tr-sm'
+                                            : 'bg-[#1e1e2d] text-gray-200 border border-white/5 rounded-2xl rounded-tl-sm'
                                             }`}
                                     >
                                         {renderContent(msg.content)}
