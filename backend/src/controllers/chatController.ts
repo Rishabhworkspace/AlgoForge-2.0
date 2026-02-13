@@ -44,9 +44,9 @@ export const chat = async (req: Request, res: Response) => {
 
         const fullSystemPrompt = `${SYSTEM_PROMPT}\n\n## PROBLEM CATALOG:\n${catalogLines.join('\n')}`;
 
-        // Use gemini-pro (stable) as fallback
+        // gemini-2.5-flash — confirmed working with free tier
         const model = genAI.getGenerativeModel({
-            model: 'gemini-pro',
+            model: 'gemini-2.5-flash',
             systemInstruction: fullSystemPrompt,
         });
 
