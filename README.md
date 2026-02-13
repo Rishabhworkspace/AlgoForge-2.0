@@ -1,36 +1,34 @@
-# AlgoForge 2.0 🚀
-
-![AlgoForge Hero](https://images.unsplash.com/photo-1555099962-4199c345e5dd?q=80&w=2070&auto=format&fit=crop)
+# AlgoForge 2.0
 
 AlgoForge 2.0 is a modern, gamified platform designed to help developers master Data Structures and Algorithms (DSA). Inspired by top learning platforms, it combines a structured roadmap with engaging gamification elements like streaks, XP systems, and global leaderboards to make learning consistent and addictive.
 
-## 🌟 Features
+## Features
 
-### 🎮 Gamified Learning
+### Gamified Learning
 - **XP & Levels:** Earn XP for every problem solved and level up your profile.
 - **Streaks:** Maintain daily activity to build discipline.
 - **Badges:** Unlock achievements for milestones.
 
-### 🗺️ Structured Roadmaps
+### Structured Roadmaps
 - Curated paths for DSA topics (Arrays, Trees, Graphs, DP).
 - Video solutions and practice problems for each topic.
 - Progress tracking per module.
 
-### 🏆 Dynamic Leaderboard
+### Dynamic Leaderboard
 - Real-time global rankings.
 - Filter by XP, Streak, or Problems Solved.
 - See where you stand against other learners.
 
-### 👤 Personalized Dashboard
+### Personalized Dashboard
 - **Activity Graph:** Visualize your weekly coding intensity.
 - **Resume Learning:** One-click access to your last studied topic.
 - **Stats Overview:** Quick view of your solve count and global rank.
 
-### 🔐 Secure Authentication
+### Secure Authentication
 - Email/Password login.
 - Google OAuth integration for one-click access.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - **Framework:** [Next.js](https://nextjs.org/)
@@ -46,7 +44,7 @@ AlgoForge 2.0 is a modern, gamified platform designed to help developers master 
 - **Database:** [MongoDB](https://www.mongodb.com/) + [Mongoose](https://mongoosejs.com/)
 - **Authentication:** JWT (JSON Web Tokens) & Google OAuth 2.0
 
-## 🚀 Getting Started
+## Getting Started
 
 Follow these steps to set up the project locally.
 
@@ -99,10 +97,10 @@ Follow these steps to set up the project locally.
 4.  **Visit the App**
     Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request for any features or bug fixes.
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
