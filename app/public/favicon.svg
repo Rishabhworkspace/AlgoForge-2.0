@@ -1,0 +1,28 @@
+<svg width="64" height="64" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="primary-grad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stopColor="#a088ff" />
+      <stop offset="1" stopColor="#63e3ff" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <path d="M30 20 L50 30 L50 70 L30 80 L10 70 V30 L30 20 Z" fill="url(#primary-grad)" fillOpacity="0.8"/>
+  <path d="M30 20 L30 80" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+  <path d="M10 30 L30 40 L50 30" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+
+  <path d="M70 20 L90 30 V50 L70 60 L50 50 V30 L70 20 Z" fill="url(#primary-grad)" fillOpacity="0.6"/>
+  <path d="M50 30 L70 40 L90 30" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+
+  <path d="M70 60 L90 70 V90 L70 80 L50 90 V70 L70 60 Z" fill="url(#primary-grad)" fillOpacity="0.9"/>
+  <path d="M50 70 L70 80 L90 70" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+
+  <circle cx="50" cy="50" r="8" fill="white" filter="url(#glow)"/>
+  
+  <path d="M30 40 L50 50" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.6"/>
+  <path d="M70 40 L50 50" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.6"/>
+  <path d="M70 80 L50 50" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.6"/>
+</svg>

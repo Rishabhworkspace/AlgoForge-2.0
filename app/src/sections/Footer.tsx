@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
 import {
-  Code2,
   Github,
   Twitter,
   Linkedin,
   Mail,
   MapPin
 } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
 
 // Footer component - onNavigate prop reserved for future use
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -65,8 +65,8 @@ export function Footer({ onNavigate }: FooterProps) {
               transition={{ duration: 0.6 }}
             >
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#a088ff] to-[#63e3ff] flex items-center justify-center">
-                  <Code2 className="w-5 h-5 text-[#141414]" />
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
+                  <Logo className="w-6 h-6" />
                 </div>
                 <span className="font-display text-2xl text-white">AlgoForge</span>
               </div>

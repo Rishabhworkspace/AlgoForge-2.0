@@ -18,6 +18,7 @@ import { Leaderboard } from '@/sections/Leaderboard';
 import { DailyChallenges } from '@/sections/DailyChallenges';
 import { TestimonialsPage } from '@/sections/TestimonialsPage';
 import { AuthModal } from '@/components/custom/AuthModal';
+import { AlgoBot } from '@/components/custom/AlgoBot';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 
@@ -216,7 +217,7 @@ function AppContent() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 p-3 rounded-full bg-[#a088ff] text-white shadow-lg z-50 hover:bg-[#8f76fa] transition-colors"
+            className="fixed bottom-8 right-24 p-3 rounded-full bg-[#a088ff] text-white shadow-lg z-40 hover:bg-[#8f76fa] transition-colors"
           >
             <svg
               className="w-6 h-6"
@@ -245,6 +246,8 @@ function AppContent() {
           },
         }}
       />
+
+      <AlgoBot onAuthClick={handleAuthClick} />
     </div>
   );
 }

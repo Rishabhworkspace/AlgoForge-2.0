@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Flame
 } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -122,8 +123,8 @@ export function Navigation({ currentView, onNavigate, onAuthClick }: NavigationP
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#a088ff] to-[#63e3ff] flex items-center justify-center">
-                <Code2 className="w-5 h-5 text-[#141414]" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#a088ff]/20 to-[#63e3ff]/20 border border-white/10 flex items-center justify-center backdrop-blur-sm shadow-lg shadow-[#a088ff]/5">
+                <Logo className="w-6 h-6" />
               </div>
               <span className="font-display text-2xl text-white hidden sm:block">
                 AlgoForge
