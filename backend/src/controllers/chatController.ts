@@ -44,9 +44,9 @@ export const chat = async (req: Request, res: Response) => {
 
         const fullSystemPrompt = `${SYSTEM_PROMPT}\n\n## PROBLEM CATALOG:\n${catalogLines.join('\n')}`;
 
-        // Use native systemInstruction support
+        // Use gemini-pro (stable) as fallback
         const model = genAI.getGenerativeModel({
-            model: 'gemini-1.5-flash',
+            model: 'gemini-pro',
             systemInstruction: fullSystemPrompt,
         });
 
