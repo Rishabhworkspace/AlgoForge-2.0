@@ -1,0 +1,97 @@
+export const interviewProblems = [
+    // TOP ARRAY QUESTIONS (10)
+    { title: "Two Sum", topic_id: "arrays-interview", difficulty: "Easy", tags: ["Array", "Hash Table"] },
+    { title: "Best Time to Buy and Sell Stock", topic_id: "arrays-interview", difficulty: "Easy", tags: ["Array", "DP"] },
+    { title: "Product of Array Except Self", topic_id: "arrays-interview", difficulty: "Medium", tags: ["Array"] },
+    { title: "Maximum Subarray", topic_id: "arrays-interview", difficulty: "Medium", tags: ["Array", "DP"] },
+    { title: "3Sum", topic_id: "arrays-interview", difficulty: "Medium", tags: ["Array", "Two Pointers"] },
+    { title: "Container With Most Water", topic_id: "arrays-interview", difficulty: "Medium", tags: ["Array", "Two Pointers"] },
+    { title: "Merge Intervals", topic_id: "arrays-interview", difficulty: "Medium", tags: ["Array", "Sorting"] },
+    { title: "Next Permutation", topic_id: "arrays-interview", difficulty: "Medium", tags: ["Array"] },
+    { title: "Trapping Rain Water", topic_id: "arrays-interview", difficulty: "Hard", tags: ["Array", "Two Pointers", "Stack"] },
+    { title: "First Missing Positive", topic_id: "arrays-interview", difficulty: "Hard", tags: ["Array", "Hash Table"] },
+
+    // TOP STRING QUESTIONS (10)
+    { title: "Valid Anagram", topic_id: "strings-interview", difficulty: "Easy", tags: ["String", "Hash Table"] },
+    { title: "Valid Palindrome", topic_id: "strings-interview", difficulty: "Easy", tags: ["String", "Two Pointers"] },
+    { title: "Longest Common Prefix", topic_id: "strings-interview", difficulty: "Easy", tags: ["String"] },
+    { title: "Longest Substring Without Repeating Characters", topic_id: "strings-interview", difficulty: "Medium", tags: ["String", "Sliding Window"] },
+    { title: "String to Integer (atoi)", topic_id: "strings-interview", difficulty: "Medium", tags: ["String"] },
+    { title: "Group Anagrams", topic_id: "strings-interview", difficulty: "Medium", tags: ["String", "Hash Table"] },
+    { title: "Longest Palindromic Substring", topic_id: "strings-interview", difficulty: "Medium", tags: ["String", "DP"] },
+    { title: "Implement strStr()", topic_id: "strings-interview", difficulty: "Medium", tags: ["String", "KMP"] },
+    { title: "Minimum Window Substring", topic_id: "strings-interview", difficulty: "Hard", tags: ["String", "Sliding Window"] },
+    { title: "Regular Expression Matching", topic_id: "strings-interview", difficulty: "Hard", tags: ["String", "DP"] },
+
+    // TOP TREE QUESTIONS (10)
+    { title: "Maximum Depth of Binary Tree", topic_id: "trees-interview", difficulty: "Easy", tags: ["Tree", "DFS"] },
+    { title: "Invert Binary Tree", topic_id: "trees-interview", difficulty: "Easy", tags: ["Tree", "DFS"] },
+    { title: "Symmetric Tree", topic_id: "trees-interview", difficulty: "Easy", tags: ["Tree", "BFS"] },
+    { title: "Binary Tree Level Order Traversal", topic_id: "trees-interview", difficulty: "Medium", tags: ["Tree", "BFS"] },
+    { title: "Validate Binary Search Tree", topic_id: "trees-interview", difficulty: "Medium", tags: ["Tree", "DFS", "BST"] },
+    { title: "Lowest Common Ancestor of a Binary Tree", topic_id: "trees-interview", difficulty: "Medium", tags: ["Tree", "DFS"] },
+    { title: "Construct Binary Tree from Preorder and Inorder Traversal", topic_id: "trees-interview", difficulty: "Medium", tags: ["Tree"] },
+    { title: "Binary Tree Maximum Path Sum", topic_id: "trees-interview", difficulty: "Hard", tags: ["Tree", "DFS"] },
+    { title: "Serialize and Deserialize Binary Tree", topic_id: "trees-interview", difficulty: "Hard", tags: ["Tree", "Design"] },
+    { title: "Binary Tree Right Side View", topic_id: "trees-interview", difficulty: "Hard", tags: ["Tree", "BFS"] },
+
+    // TOP GRAPH QUESTIONS (10)
+    { title: "Number of Islands", topic_id: "graphs-interview", difficulty: "Medium", tags: ["Graph", "DFS", "BFS"] },
+    { title: "Clone Graph", topic_id: "graphs-interview", difficulty: "Medium", tags: ["Graph", "DFS"] },
+    { title: "Course Schedule", topic_id: "graphs-interview", difficulty: "Medium", tags: ["Graph", "Topological Sort"] },
+    { title: "Course Schedule II", topic_id: "graphs-interview", difficulty: "Medium", tags: ["Graph", "Topological Sort"] },
+    { title: "Pacific Atlantic Water Flow", topic_id: "graphs-interview", difficulty: "Medium", tags: ["Graph", "DFS"] },
+    { title: "Number of Connected Components", topic_id: "graphs-interview", difficulty: "Medium", tags: ["Graph", "Union Find"] },
+    { title: "Graph Valid Tree", topic_id: "graphs-interview", difficulty: "Medium", tags: ["Graph", "DFS", "BFS"] },
+    { title: "Word Ladder", topic_id: "graphs-interview", difficulty: "Hard", tags: ["Graph", "BFS"] },
+    { title: "Alien Dictionary", topic_id: "graphs-interview", difficulty: "Hard", tags: ["Graph", "Topological Sort"] },
+    { title: "Critical Connections in a Network", topic_id: "graphs-interview", difficulty: "Hard", tags: ["Graph", "DFS"] },
+
+    // DP MUST-DOS (10)
+    { title: "Climbing Stairs", topic_id: "dp-interview", difficulty: "Easy", tags: ["DP"] },
+    { title: "House Robber", topic_id: "dp-interview", difficulty: "Medium", tags: ["DP"] },
+    { title: "Coin Change", topic_id: "dp-interview", difficulty: "Medium", tags: ["DP"] },
+    { title: "Longest Increasing Subsequence", topic_id: "dp-interview", difficulty: "Medium", tags: ["DP", "Binary Search"] },
+    { title: "Word Break", topic_id: "dp-interview", difficulty: "Medium", tags: ["DP", "Trie"] },
+    { title: "Unique Paths", topic_id: "dp-interview", difficulty: "Medium", tags: ["DP", "Matrix"] },
+    { title: "Decode Ways", topic_id: "dp-interview", difficulty: "Medium", tags: ["DP", "String"] },
+    { title: "Longest Common Subsequence", topic_id: "dp-interview", difficulty: "Medium", tags: ["DP", "String"] },
+    { title: "Edit Distance", topic_id: "dp-interview", difficulty: "Hard", tags: ["DP", "String"] },
+    { title: "Burst Balloons", topic_id: "dp-interview", difficulty: "Hard", tags: ["DP"] },
+
+    // SORTING & SEARCHING MUST-DOS (10)
+    { title: "Binary Search", topic_id: "sorting-searching-interview", difficulty: "Easy", tags: ["Binary Search"] },
+    { title: "First Bad Version", topic_id: "sorting-searching-interview", difficulty: "Easy", tags: ["Binary Search"] },
+    { title: "Search Insert Position", topic_id: "sorting-searching-interview", difficulty: "Easy", tags: ["Binary Search"] },
+    { title: "Find First and Last Position of Element in Sorted Array", topic_id: "sorting-searching-interview", difficulty: "Medium", tags: ["Binary Search"] },
+    { title: "Search in Rotated Sorted Array", topic_id: "sorting-searching-interview", difficulty: "Medium", tags: ["Binary Search"] },
+    { title: "Sort Colors", topic_id: "sorting-searching-interview", difficulty: "Medium", tags: ["Sorting", "Two Pointers"] },
+    { title: "Kth Largest Element in an Array", topic_id: "sorting-searching-interview", difficulty: "Medium", tags: ["Sorting", "Heap"] },
+    { title: "Merge Sorted Array", topic_id: "sorting-searching-interview", difficulty: "Medium", tags: ["Sorting", "Two Pointers"] },
+    { title: "Median of Two Sorted Arrays", topic_id: "sorting-searching-interview", difficulty: "Hard", tags: ["Binary Search"] },
+    { title: "Find Minimum in Rotated Sorted Array", topic_id: "sorting-searching-interview", difficulty: "Hard", tags: ["Binary Search"] },
+
+    // STACK & QUEUE MUST-DOS (10)
+    { title: "Valid Parentheses", topic_id: "stacks-queues-interview", difficulty: "Easy", tags: ["Stack"] },
+    { title: "Implement Queue using Stacks", topic_id: "stacks-queues-interview", difficulty: "Easy", tags: ["Stack", "Design"] },
+    { title: "Min Stack", topic_id: "stacks-queues-interview", difficulty: "Medium", tags: ["Stack", "Design"] },
+    { title: "Daily Temperatures", topic_id: "stacks-queues-interview", difficulty: "Medium", tags: ["Stack", "Monotonic Stack"] },
+    { title: "Evaluate Reverse Polish Notation", topic_id: "stacks-queues-interview", difficulty: "Medium", tags: ["Stack"] },
+    { title: "Decode String", topic_id: "stacks-queues-interview", difficulty: "Medium", tags: ["Stack"] },
+    { title: "Next Greater Element I", topic_id: "stacks-queues-interview", difficulty: "Medium", tags: ["Stack", "Monotonic Stack"] },
+    { title: "Largest Rectangle in Histogram", topic_id: "stacks-queues-interview", difficulty: "Hard", tags: ["Stack", "Monotonic Stack"] },
+    { title: "Sliding Window Maximum", topic_id: "stacks-queues-interview", difficulty: "Hard", tags: ["Queue", "Monotonic Queue"] },
+    { title: "Basic Calculator", topic_id: "stacks-queues-interview", difficulty: "Hard", tags: ["Stack", "Math"] },
+
+    // MIXED TOPIC MUST-DOS (10)
+    { title: "LRU Cache", topic_id: "misc-interview", difficulty: "Medium", tags: ["Hash Table", "Linked List", "Design"] },
+    { title: "Top K Frequent Elements", topic_id: "misc-interview", difficulty: "Medium", tags: ["Heap", "Hash Table"] },
+    { title: "Find Median from Data Stream", topic_id: "misc-interview", difficulty: "Hard", tags: ["Heap", "Design"] },
+    { title: "Rotate Image", topic_id: "misc-interview", difficulty: "Medium", tags: ["Array", "Matrix"] },
+    { title: "Spiral Matrix", topic_id: "misc-interview", difficulty: "Medium", tags: ["Array", "Matrix"] },
+    { title: "Set Matrix Zeroes", topic_id: "misc-interview", difficulty: "Medium", tags: ["Array", "Matrix"] },
+    { title: "Pow(x, n)", topic_id: "misc-interview", difficulty: "Medium", tags: ["Math", "Recursion"] },
+    { title: "Happy Number", topic_id: "misc-interview", difficulty: "Easy", tags: ["Math", "Hash Table"] },
+    { title: "Count Primes", topic_id: "misc-interview", difficulty: "Medium", tags: ["Math", "Sieve"] },
+    { title: "Reverse Integer", topic_id: "misc-interview", difficulty: "Medium", tags: ["Math"] }
+];

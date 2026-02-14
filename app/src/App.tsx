@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { Navigation } from '@/components/custom/Navigation';
+import { PathDetail } from '@/sections/PathDetail';
 import { Hero } from '@/sections/Hero';
 import { UserHero } from '@/sections/UserHero';
 import { Roadmaps } from '@/sections/Roadmaps';
@@ -22,12 +23,13 @@ import { AlgoBot } from '@/components/custom/AlgoBot';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 
-type View = 'home' | 'dashboard' | 'topic' | 'problems' | 'notes' | 'leaderboard' | 'testimonials' | 'daily-challenges';
+type View = 'home' | 'dashboard' | 'topic' | 'path' | 'problems' | 'notes' | 'leaderboard' | 'testimonials' | 'daily-challenges';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
   const [currentView, setCurrentView] = useState<View>('home');
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+  const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -37,7 +39,11 @@ function AppContent() {
       const hash = window.location.hash.slice(1);
 
       if (hash) {
-        if (hash.startsWith('topic/')) {
+        if (hash.startsWith('path/')) {
+          const pId = hash.replace('path/', '');
+          setSelectedPathId(pId);
+          setCurrentView('path');
+        } else if (hash.startsWith('topic/')) {
           const topicId = hash.replace('topic/', '');
           setSelectedTopicId(topicId);
           setCurrentView('topic');
@@ -116,6 +122,13 @@ function AppContent() {
     handleNavigate('topic', topicId);
   };
 
+  const handlePathClick = (pathId: string) => {
+    setSelectedPathId(pathId);
+    setCurrentView('path');
+    window.location.hash = `path/${pathId}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleAuthClick = (mode: 'login' | 'signup') => {
     setAuthMode(mode);
     setIsAuthModalOpen(true);
@@ -125,14 +138,31 @@ function AppContent() {
     switch (currentView) {
       case 'dashboard':
         return <Dashboard onNavigate={handleNavigate} />;
+      case 'path':
+        return selectedPathId ? (
+          <PathDetail
+            pathId={selectedPathId}
+            onBack={() => handleNavigate('home')}
+            onTopicClick={handleTopicClick}
+          />
+        ) : (
+          <Roadmaps onPathClick={handlePathClick} />
+        );
       case 'topic':
         return selectedTopicId ? (
           <TopicDetail
             topicId={selectedTopicId}
-            onBack={() => handleNavigate('home')}
+            onBack={() => {
+              if (selectedPathId) {
+                setCurrentView('path');
+                window.location.hash = `path/${selectedPathId}`;
+              } else {
+                handleNavigate('home');
+              }
+            }}
           />
         ) : (
-          <Roadmaps onTopicClick={handleTopicClick} />
+          <Roadmaps onPathClick={handlePathClick} />
         );
       case 'problems':
         return <Problems />;
@@ -149,13 +179,13 @@ function AppContent() {
         return user ? (
           <>
             <UserHero user={user} onTopicClick={handleTopicClick} />
-            <Roadmaps onTopicClick={handleTopicClick} />
+            <Roadmaps onPathClick={handlePathClick} />
             <Testimonials onNavigate={handleNavigate} />
           </>
         ) : (
           <>
             <Hero onGetStarted={() => handleAuthClick('signup')} />
-            <Roadmaps onTopicClick={handleTopicClick} />
+            <Roadmaps onPathClick={handlePathClick} />
             <Features />
             <HowItWorks onGetStarted={() => handleAuthClick('signup')} />
             <Testimonials onNavigate={handleNavigate} />

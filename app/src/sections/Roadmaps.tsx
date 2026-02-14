@@ -14,7 +14,7 @@ import { getLearningPaths, getTopicsByPath } from '@/api/content';
 import { useStats } from '@/hooks/useStats';
 
 interface RoadmapsProps {
-  onTopicClick: (topicId: string) => void;
+  onPathClick: (pathId: string) => void;
 }
 
 const iconMap: Record<string, React.ElementType> = {
@@ -26,7 +26,7 @@ const iconMap: Record<string, React.ElementType> = {
   Server
 };
 
-export function Roadmaps({ onTopicClick }: RoadmapsProps) {
+export function Roadmaps({ onPathClick }: RoadmapsProps) {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const { problemCount, videoCount, roadmapCount, userCount } = useStats();
 
@@ -133,11 +133,7 @@ export function Roadmaps({ onTopicClick }: RoadmapsProps) {
                       : 'translateY(0) scale(1)',
                     transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
                   }}
-                  onClick={() => {
-                    if (topics.length > 0) {
-                      onTopicClick(topics[0].id);
-                    }
-                  }}
+                  onClick={() => onPathClick(category.id)}
                 >
                   {/* Gradient Border Effect */}
                   <div

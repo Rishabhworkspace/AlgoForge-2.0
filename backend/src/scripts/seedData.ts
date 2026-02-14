@@ -65,9 +65,13 @@ export const roadmapCategories = [
         color: '#ff88c9',
         topics: [
             'arrays-interview',
+            'strings-interview',
             'trees-interview',
+            'graphs-interview',
             'dp-interview',
-            'system-design-basic'
+            'sorting-searching-interview',
+            'stacks-queues-interview',
+            'misc-interview'
         ]
     },
     {
@@ -80,7 +84,8 @@ export const roadmapCategories = [
             'system-design-basics',
             'load-balancing',
             'caching',
-            'database-design'
+            'database-design',
+            'real-world-designs'
         ]
     }
 ];
@@ -301,6 +306,56 @@ export const topics = [
         color: '#ff88c9',
         total_problems: 10
     },
+    {
+        id: 'strings-interview',
+        title: 'Top String Questions',
+        category: 'interview',
+        description: 'Most asked string interview questions',
+        order_index: 5,
+        icon: 'Type',
+        color: '#ff88c9',
+        total_problems: 10
+    },
+    {
+        id: 'graphs-interview',
+        title: 'Top Graph Questions',
+        category: 'interview',
+        description: 'Essential graph problems for interviews',
+        order_index: 6,
+        icon: 'Network',
+        color: '#ff88c9',
+        total_problems: 10
+    },
+    {
+        id: 'sorting-searching-interview',
+        title: 'Sorting & Searching Must-Dos',
+        category: 'interview',
+        description: 'Key sorting and searching interview problems',
+        order_index: 7,
+        icon: 'ArrowUpDown',
+        color: '#ff88c9',
+        total_problems: 10
+    },
+    {
+        id: 'stacks-queues-interview',
+        title: 'Stack & Queue Must-Dos',
+        category: 'interview',
+        description: 'Essential stack and queue interview problems',
+        order_index: 8,
+        icon: 'Layers',
+        color: '#ff88c9',
+        total_problems: 10
+    },
+    {
+        id: 'misc-interview',
+        title: 'Mixed Topic Must-Dos',
+        category: 'interview',
+        description: 'Cross-topic must-know interview problems',
+        order_index: 9,
+        icon: 'Shuffle',
+        color: '#ff88c9',
+        total_problems: 10
+    },
     // System Design
     {
         id: 'system-design-basics',
@@ -340,7 +395,17 @@ export const topics = [
         order_index: 4,
         icon: 'Database',
         color: '#ffd700',
-        total_problems: 12
+        total_problems: 8
+    },
+    {
+        id: 'real-world-designs',
+        title: 'Real-World System Designs',
+        category: 'system-design',
+        description: 'Design Twitter, YouTube, Uber, and more',
+        order_index: 5,
+        icon: 'Globe',
+        color: '#ffd700',
+        total_problems: 8
     }
 ];
 

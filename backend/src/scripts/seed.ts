@@ -16,6 +16,8 @@ import { dsaProblems } from './data/dsa';
 import { algoProblems } from './data/algo';
 import { dpProblems } from './data/dp';
 import { graphProblems } from './data/graphs';
+import { interviewProblems } from './data/interview';
+import { systemDesignProblems } from './data/system-design';
 
 const seedData = async () => {
     try {
@@ -54,7 +56,9 @@ const seedData = async () => {
             ...dsaProblems,
             ...algoProblems,
             ...dpProblems,
-            ...graphProblems
+            ...graphProblems,
+            ...interviewProblems,
+            ...systemDesignProblems
         ];
 
         // Map raw problems to full Problem documents with auto-generated links
