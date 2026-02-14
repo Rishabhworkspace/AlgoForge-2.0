@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     ArrowLeft,
-    PlayCircle,
     CheckCircle2,
     ChevronRight,
     Binary,
@@ -60,7 +59,7 @@ export function PathDetail({ pathId, onBack, onTopicClick }: PathDetailProps) {
                         let completed = 0;
                         if (user && token) {
                             try {
-                                const progress = await getUserProgress(token);
+                                const progress = await getUserProgress();
                                 if (progress?.completedProblems) {
                                     const problemIds = problems.map((p: any) => p._id);
                                     completed = progress.completedProblems.filter((id: string) => problemIds.includes(id)).length;
