@@ -359,7 +359,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             { label: 'XP Points', value: animXP, sub: `Level ${level}`, icon: Zap, color: '#ffd700', glow: 'rgba(255,215,0,0.12)' },
             { label: 'Day Streak', value: animStreak, sub: stats.currentStreak > 0 ? 'Keep it up!' : 'Solve to start!', icon: Flame, color: '#ff8a63', glow: 'rgba(255,138,99,0.12)' },
             { label: 'Global Rank', value: `#${rankInfo.rank}`, sub: `Top ${rankInfo.topPercent}%`, icon: Trophy, color: '#88ff9f', glow: 'rgba(136,255,159,0.12)' },
-          ].map((stat, index) => (
+          ].map((stat) => (
             <motion.div
               key={stat.label}
               whileHover={{ scale: 1.03, y: -4 }}
