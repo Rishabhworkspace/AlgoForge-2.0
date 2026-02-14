@@ -464,3 +464,17 @@ input:focus-visible {
   background: rgba(160, 136, 255, 0.3);
   color: white;
 }
+
+/* Shimmer animation for badges */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}

@@ -344,39 +344,59 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
                                 </h3>
                                 <span className="text-sm text-white/40">Last 7 Days</span>
                             </div>
-                            <div className="w-full h-40 relative">
-                                <svg viewBox="0 0 300 120" className="w-full h-full" preserveAspectRatio="none">
+                            <div className="w-full h-44 relative">
+                                <svg viewBox="0 0 340 130" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
                                     <defs>
                                         <linearGradient id="heroAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stopColor="#63e3ff" stopOpacity="0.3" />
-                                            <stop offset="100%" stopColor="#63e3ff" stopOpacity="0.02" />
+                                            <stop offset="0%" stopColor="#63e3ff" stopOpacity="0.25" />
+                                            <stop offset="60%" stopColor="#63e3ff" stopOpacity="0.08" />
+                                            <stop offset="100%" stopColor="#63e3ff" stopOpacity="0.01" />
                                         </linearGradient>
+                                        <filter id="heroGlow">
+                                            <feGaussianBlur stdDeviation="3" result="blur" />
+                                            <feMerge>
+                                                <feMergeNode in="blur" />
+                                                <feMergeNode in="SourceGraphic" />
+                                            </feMerge>
+                                        </filter>
                                     </defs>
-                                    {/* Grid lines */}
-                                    {[0, 1, 2, 3].map(i => (
-                                        <line key={i} x1="0" y1={i * 30 + 10} x2="300" y2={i * 30 + 10}
-                                            stroke="white" strokeOpacity="0.05" strokeWidth="0.5" />
+
+                                    {/* Subtle grid lines */}
+                                    {[0, 1, 2, 3, 4].map(i => (
+                                        <line key={i} x1="30" y1={i * 22 + 10} x2="320" y2={i * 22 + 10}
+                                            stroke="white" strokeOpacity="0.04" strokeWidth="0.5" strokeDasharray="4 4" />
                                     ))}
+
+                                    {/* Y-axis labels */}
+                                    {[0, 1, 2, 3, 4].map(i => {
+                                        const val = Math.round(maxActivity * (4 - i) / 4);
+                                        return (
+                                            <text key={i} x="24" y={i * 22 + 13} textAnchor="end"
+                                                fill="white" fillOpacity="0.2" fontSize="7">{val}</text>
+                                        );
+                                    })}
+
                                     {/* Area fill */}
                                     <motion.polygon
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         transition={{ duration: 1, delay: 0.8 }}
-                                        points={`0,110 ${weeklyActivity.map((d: any, i: number) => {
-                                            const x = i * 50;
-                                            const y = maxActivity > 0 ? 110 - (d.count / maxActivity) * 90 : 110;
+                                        points={`40,100 ${weeklyActivity.map((d: any, i: number) => {
+                                            const x = 40 + i * 46;
+                                            const y = maxActivity > 0 ? 100 - (d.count / maxActivity) * 82 : 100;
                                             return `${x},${y}`;
-                                        }).join(' ')} 300,110`}
+                                        }).join(' ')} ${40 + 6 * 46},100`}
                                         fill="url(#heroAreaGradient)"
                                     />
+
                                     {/* Line */}
                                     <motion.polyline
                                         initial={{ pathLength: 0, opacity: 0 }}
                                         animate={{ pathLength: 1, opacity: 1 }}
                                         transition={{ duration: 1.5, delay: 0.6 }}
                                         points={weeklyActivity.map((d: any, i: number) => {
-                                            const x = i * 50;
-                                            const y = maxActivity > 0 ? 110 - (d.count / maxActivity) * 90 : 110;
+                                            const x = 40 + i * 46;
+                                            const y = maxActivity > 0 ? 100 - (d.count / maxActivity) * 82 : 100;
                                             return `${x},${y}`;
                                         }).join(' ')}
                                         fill="none"
@@ -384,16 +404,24 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
                                         strokeWidth="2.5"
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
+                                        filter="url(#heroGlow)"
                                     />
+
                                     {/* Dots + labels */}
                                     {weeklyActivity.map((d: any, i: number) => {
-                                        const x = i * 50;
-                                        const y = maxActivity > 0 ? 110 - (d.count / maxActivity) * 90 : 110;
+                                        const x = 40 + i * 46;
+                                        const y = maxActivity > 0 ? 100 - (d.count / maxActivity) * 82 : 100;
+                                        const isToday = i === 6;
                                         return (
                                             <g key={i}>
+                                                {/* Outer glow for today */}
+                                                {isToday && (
+                                                    <circle cx={x} cy={y} r={7}
+                                                        fill="#63e3ff" fillOpacity="0.15" />
+                                                )}
                                                 <motion.circle
                                                     initial={{ r: 0 }}
-                                                    animate={{ r: 4 }}
+                                                    animate={{ r: isToday ? 4.5 : 3.5 }}
                                                     transition={{ duration: 0.3, delay: 0.8 + i * 0.1 }}
                                                     cx={x} cy={y}
                                                     fill="#63e3ff"
@@ -403,19 +431,27 @@ export function UserHero({ user, onTopicClick }: UserHeroProps) {
                                                 {d.count > 0 && (
                                                     <text x={x} y={y - 10} textAnchor="middle"
                                                         fill="white" fillOpacity="0.6" fontSize="9"
-                                                        fontWeight="500"
+                                                        fontWeight="600"
                                                     >{d.count}</text>
                                                 )}
                                             </g>
                                         );
                                     })}
+
+                                    {/* Day labels */}
+                                    {weeklyActivity.map((d: any, i: number) => {
+                                        const x = 40 + i * 46;
+                                        const isToday = i === 6;
+                                        return (
+                                            <text key={'label' + i} x={x} y={118} textAnchor="middle"
+                                                fill={isToday ? '#63e3ff' : 'white'}
+                                                fillOpacity={isToday ? 0.8 : 0.35}
+                                                fontSize="8" fontWeight={isToday ? '600' : '400'}>
+                                                {d.day}
+                                            </text>
+                                        );
+                                    })}
                                 </svg>
-                                {/* Day labels */}
-                                <div className="flex justify-between mt-2">
-                                    {weeklyActivity.map((d: any, i: number) => (
-                                        <span key={i} className="text-xs text-white/40 w-[50px] text-center">{d.day}</span>
-                                    ))}
-                                </div>
                             </div>
                         </motion.div>
                     </div>
