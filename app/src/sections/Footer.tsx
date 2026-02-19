@@ -23,15 +23,9 @@ const footerLinks = {
     { label: 'Leaderboard', href: '#leaderboard' },
   ],
   resources: [
-    { label: 'Documentation', href: '#' },
-    { label: 'API Reference', href: '#' },
-    { label: 'Community', href: '#' },
-    { label: 'Blog', href: '#' },
-  ],
-  legal: [
-    { label: 'Privacy Policy', href: '#' },
-    { label: 'Terms of Service', href: '#' },
-    { label: 'Cookie Policy', href: '#' },
+    { label: 'Documentation', href: '#docs', description: 'Getting started guides' },
+    { label: 'API Reference', href: '#api', description: 'REST API endpoints' },
+    { label: 'Community', href: '#community', description: 'Discussion forum' },
   ]
 };
 
@@ -138,9 +132,10 @@ export function Footer({ onNavigate }: FooterProps) {
                 <li key={link.label}>
                   <a
                     href={link.href}
-                    className="text-sm text-white/60 hover:text-white transition-colors"
+                    className="text-sm text-white/60 hover:text-white transition-colors block"
                   >
                     {link.label}
+                    <span className="block text-xs text-white/30">{link.description}</span>
                   </a>
                 </li>
               ))}
@@ -170,48 +165,11 @@ export function Footer({ onNavigate }: FooterProps) {
           </motion.div>
         </div>
 
-        {/* Newsletter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="glass rounded-2xl p-6 mb-12"
-        >
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <h4 className="font-semibold text-white mb-1">Stay Updated</h4>
-              <p className="text-sm text-white/60">Get the latest problems and tips delivered to your inbox.</p>
-            </div>
-            <div className="flex gap-2 w-full md:w-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 md:w-64 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-[#a088ff]"
-              />
-              <button className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#a088ff] to-[#63e3ff] text-[#141414] font-medium hover:opacity-90 transition-opacity">
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </motion.div>
-
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="pt-8 border-t border-white/10 flex items-center justify-center">
           <p className="text-sm text-white/40">
             © {new Date().getFullYear()} AlgoForge. All rights reserved.
           </p>
-          <div className="flex gap-6">
-            {footerLinks.legal.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="text-sm text-white/40 hover:text-white transition-colors"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
         </div>
       </div>
     </footer>

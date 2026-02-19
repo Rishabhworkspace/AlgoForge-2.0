@@ -8,7 +8,7 @@ import { UserHero } from '@/sections/UserHero';
 import { Roadmaps } from '@/sections/Roadmaps';
 import { Features } from '@/sections/Features';
 import { HowItWorks } from '@/sections/HowItWorks';
-import { Testimonials } from '@/sections/Testimonials';
+import { CommunityHub } from '@/sections/CommunityHub';
 import { CTA } from '@/sections/CTA';
 import { Footer } from '@/sections/Footer';
 import { Dashboard } from '@/sections/Dashboard';
@@ -17,13 +17,13 @@ import { Problems } from '@/sections/Problems';
 import { Notes } from '@/sections/Notes';
 import { Leaderboard } from '@/sections/Leaderboard';
 import { DailyChallenges } from '@/sections/DailyChallenges';
-import { TestimonialsPage } from '@/sections/TestimonialsPage';
+import { CommunityForum } from '@/sections/CommunityForum';
 import { AuthModal } from '@/components/custom/AuthModal';
 import { AlgoBot } from '@/components/custom/AlgoBot';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 
-type View = 'home' | 'dashboard' | 'topic' | 'path' | 'problems' | 'notes' | 'leaderboard' | 'testimonials' | 'daily-challenges';
+type View = 'home' | 'dashboard' | 'topic' | 'path' | 'problems' | 'notes' | 'leaderboard' | 'community' | 'daily-challenges';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -65,8 +65,8 @@ function AppContent() {
           }
         } else if (hash === 'leaderboard') {
           setCurrentView('leaderboard');
-        } else if (hash === 'testimonials') {
-          setCurrentView('testimonials');
+        } else if (hash === 'community') {
+          setCurrentView('community');
         } else if (hash === 'daily-challenges') {
           if (user) {
             setCurrentView('daily-challenges');
@@ -172,15 +172,15 @@ function AppContent() {
         return <Leaderboard />;
       case 'daily-challenges':
         return <DailyChallenges onBack={() => handleNavigate('dashboard')} />;
-      case 'testimonials':
-        return <TestimonialsPage onBack={() => handleNavigate('home')} />;
+      case 'community':
+        return <CommunityForum onBack={() => handleNavigate('home')} onAuthClick={handleAuthClick} />;
       case 'home':
       default:
         return user ? (
           <>
             <UserHero user={user} onTopicClick={handleTopicClick} />
             <Roadmaps onPathClick={handlePathClick} />
-            <Testimonials onNavigate={handleNavigate} />
+            <CommunityHub onNavigate={handleNavigate} />
           </>
         ) : (
           <>
@@ -188,7 +188,7 @@ function AppContent() {
             <Roadmaps onPathClick={handlePathClick} />
             <Features />
             <HowItWorks onGetStarted={() => handleAuthClick('signup')} />
-            <Testimonials onNavigate={handleNavigate} />
+            <CommunityHub onNavigate={handleNavigate} />
             <CTA onGetStarted={() => handleAuthClick('signup')} />
           </>
         );
