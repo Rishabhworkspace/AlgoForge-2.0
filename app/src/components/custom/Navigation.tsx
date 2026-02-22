@@ -11,7 +11,8 @@ import {
   StickyNote,
   LogOut,
   ChevronDown,
-  Flame
+  Flame,
+  Shield
 } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { Button } from '@/components/ui/button';
@@ -70,6 +71,7 @@ export function Navigation({ currentView, onNavigate, onAuthClick }: NavigationP
     { id: 'roadmaps', label: 'Roadmaps', icon: Map, view: 'home' as const, isAnchor: true },
     { id: 'problems', label: 'Problems', icon: List, view: 'problems' as const, isAnchor: false },
     { id: 'leaderboard', label: 'Leaderboard', icon: Trophy, view: 'leaderboard' as const, isAnchor: false },
+    ...(user?.role === 'admin' ? [{ id: 'admin', label: 'Admin', icon: Shield, view: 'admin' as any, isAnchor: false }] : []),
   ];
 
   const handleNavClick = (link: typeof navLinks[0]) => {
@@ -207,6 +209,15 @@ export function Navigation({ currentView, onNavigate, onAuthClick }: NavigationP
                         <StickyNote className="w-4 h-4 mr-2" />
                         My Notes
                       </DropdownMenuItem>
+                      {user.role === 'admin' && (
+                        <DropdownMenuItem
+                          onClick={() => { window.location.hash = 'admin'; }}
+                          className="text-[#a088ff] hover:text-[#b8a4ff] hover:bg-[#a088ff]/10 cursor-pointer"
+                        >
+                          <Shield className="w-4 h-4 mr-2" />
+                          Admin Panel
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuSeparator className="bg-white/10" />
                       <DropdownMenuItem
                         onClick={handleSignOut}

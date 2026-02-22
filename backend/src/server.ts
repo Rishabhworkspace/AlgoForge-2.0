@@ -33,12 +33,14 @@ import contentRoutes from './routes/contentRoutes';
 import userActionRoutes from './routes/userActionRoutes';
 import chatRoutes from './routes/chatRoutes';
 import forumRoutes from './routes/forumRoutes';
+import adminRoutes from './routes/adminRoutes';
 
 app.use('/api/info', infoRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/user-actions', userActionRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/forum', forumRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/', (req: Request, res: Response) => {
     res.send('AlgoForge API is running');

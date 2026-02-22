@@ -10,7 +10,9 @@ import {
   ArrowRight,
   PlayCircle
 } from 'lucide-react';
-import { getLearningPaths, getTopicsByPath } from '@/api/content';
+import { getLearningPaths, getTopicsByPath, getProblemsByTopic } from '@/api/content';
+import { getUserProgress } from '@/api/userActions';
+import { useAuth } from '@/contexts/AuthContext';
 import { useStats } from '@/hooks/useStats';
 
 interface RoadmapsProps {
@@ -27,11 +29,13 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 export function Roadmaps({ onPathClick }: RoadmapsProps) {
+  const { user } = useAuth();
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const { problemCount, videoCount, roadmapCount, userCount } = useStats();
 
   const [categories, setCategories] = useState<any[]>([]);
   const [topicsMap, setTopicsMap] = useState<Record<string, any[]>>({});
+  const [pathSolvedCounts, setPathSolvedCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,11 +45,42 @@ export function Roadmaps({ onPathClick }: RoadmapsProps) {
         setCategories(paths);
 
         const topicsData: Record<string, any[]> = {};
+        // Also collect all problem _ids per path for progress matching
+        const pathProblemIds: Record<string, string[]> = {};
+
         await Promise.all(paths.map(async (path: any) => {
           const pathTopics = await getTopicsByPath(path.id);
           topicsData[path.id] = pathTopics;
+
+          // Fetch problems for each topic to get their _ids
+          const problemIds: string[] = [];
+          await Promise.all(pathTopics.map(async (topic: any) => {
+            try {
+              const problems = await getProblemsByTopic(topic.id);
+              problems.forEach((p: any) => problemIds.push(p._id));
+            } catch { /* ignore */ }
+          }));
+          pathProblemIds[path.id] = problemIds;
         }));
         setTopicsMap(topicsData);
+
+        // Fetch user progress and compute solved counts per path
+        if (user) {
+          try {
+            const progressData = await getUserProgress();
+            const solvedSet = new Set<string>(
+              progressData
+                .filter((p: any) => p.status === 'SOLVED')
+                .map((p: any) => p.problem_id)
+            );
+
+            const counts: Record<string, number> = {};
+            for (const [pathId, pIds] of Object.entries(pathProblemIds)) {
+              counts[pathId] = pIds.filter(id => solvedSet.has(id)).length;
+            }
+            setPathSolvedCounts(counts);
+          } catch { /* user not logged in or error */ }
+        }
       } catch (e) {
         console.error("Failed to load roadmaps", e);
       } finally {
@@ -53,7 +88,7 @@ export function Roadmaps({ onPathClick }: RoadmapsProps) {
       }
     };
     fetchData();
-  }, []);
+  }, [user]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -116,6 +151,8 @@ export function Roadmaps({ onPathClick }: RoadmapsProps) {
             const Icon = iconMap[category.icon] || Binary;
             const topics = topicsMap[category.id] || [];
             const totalProblems = category.totalProblems || 0;
+            const solvedCount = pathSolvedCounts[category.id] || 0;
+            const progressPercent = totalProblems > 0 ? Math.round((solvedCount / totalProblems) * 100) : 0;
 
             return (
               <motion.div
@@ -173,12 +210,12 @@ export function Roadmaps({ onPathClick }: RoadmapsProps) {
                     <div className="mb-4">
                       <div className="flex items-center justify-between text-sm mb-2">
                         <span className="text-white/60">Progress</span>
-                        <span className="text-white/80">0/{totalProblems}</span>
+                        <span className="text-white/80">{solvedCount}/{totalProblems}</span>
                       </div>
                       <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
-                          whileInView={{ width: '0%' }}
+                          whileInView={{ width: `${progressPercent}%` }}
                           viewport={{ once: true }}
                           transition={{ duration: 1, delay: 0.5 }}
                           className="h-full rounded-full"

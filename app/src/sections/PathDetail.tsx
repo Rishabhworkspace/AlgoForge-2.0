@@ -45,9 +45,21 @@ export function PathDetail({ pathId, onBack, onTopicClick }: PathDetailProps) {
                 setPathInfo(currentPath);
                 setTopics(pathTopics);
 
-                // Fetch problem counts & user progress per topic
+                // Fetch user progress once (not per-topic)
+                let solvedSet = new Set<string>();
+                if (user) {
+                    try {
+                        const progressData = await getUserProgress();
+                        solvedSet = new Set<string>(
+                            progressData
+                                .filter((p: any) => p.status === 'SOLVED')
+                                .map((p: any) => p.problem_id)
+                        );
+                    } catch { /* user not logged in */ }
+                }
+
+                // Fetch problem counts per topic & compute completed from solvedSet
                 const stats: Record<string, any> = {};
-                const token = localStorage.getItem('token') || '';
 
                 await Promise.all(pathTopics.map(async (topic: any) => {
                     try {
@@ -56,16 +68,7 @@ export function PathDetail({ pathId, onBack, onTopicClick }: PathDetailProps) {
                         const medium = problems.filter((p: any) => p.difficulty === 'Medium').length;
                         const hard = problems.filter((p: any) => p.difficulty === 'Hard').length;
 
-                        let completed = 0;
-                        if (user && token) {
-                            try {
-                                const progress = await getUserProgress();
-                                if (progress?.completedProblems) {
-                                    const problemIds = problems.map((p: any) => p._id);
-                                    completed = progress.completedProblems.filter((id: string) => problemIds.includes(id)).length;
-                                }
-                            } catch { /* ignore */ }
-                        }
+                        const completed = problems.filter((p: any) => solvedSet.has(p._id)).length;
 
                         stats[topic.id] = { total: problems.length, completed, easy, medium, hard };
                     } catch {

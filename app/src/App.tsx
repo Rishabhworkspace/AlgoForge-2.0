@@ -20,10 +20,11 @@ import { DailyChallenges } from '@/sections/DailyChallenges';
 import { CommunityForum } from '@/sections/CommunityForum';
 import { AuthModal } from '@/components/custom/AuthModal';
 import { AlgoBot } from '@/components/custom/AlgoBot';
+import { AdminPanel } from '@/sections/AdminPanel';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 
-type View = 'home' | 'dashboard' | 'topic' | 'path' | 'problems' | 'notes' | 'leaderboard' | 'community' | 'daily-challenges';
+type View = 'home' | 'dashboard' | 'topic' | 'path' | 'problems' | 'notes' | 'leaderboard' | 'community' | 'daily-challenges' | 'admin';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -74,6 +75,13 @@ function AppContent() {
             window.location.hash = '';
             setCurrentView('home');
           }
+        } else if (hash === 'admin') {
+          if (user && user.role === 'admin') {
+            setCurrentView('admin');
+          } else {
+            window.location.hash = '';
+            setCurrentView('home');
+          }
         } else {
           setCurrentView('home');
         }
@@ -90,7 +98,9 @@ function AppContent() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 400);
+      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrolledPercent = scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
+      setShowScrollTop(scrolledPercent > 0.5);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -174,6 +184,8 @@ function AppContent() {
         return <DailyChallenges onBack={() => handleNavigate('dashboard')} />;
       case 'community':
         return <CommunityForum onBack={() => handleNavigate('home')} onAuthClick={handleAuthClick} />;
+      case 'admin':
+        return user?.role === 'admin' ? <AdminPanel /> : null;
       case 'home':
       default:
         return user ? (

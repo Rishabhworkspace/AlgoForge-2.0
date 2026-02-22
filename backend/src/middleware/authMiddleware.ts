@@ -32,6 +32,11 @@ const protect = async (req: Request, res: Response, next: NextFunction) => {
             // Get user from the token
             req.user = await User.findById(decoded.id).select('-password');
 
+            if (req.user?.isBanned) {
+                res.status(403).json({ message: 'Your account has been suspended' });
+                return;
+            }
+
             next();
         } catch (error) {
             console.error(error);
@@ -44,4 +49,12 @@ const protect = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export { protect };
+const adminOnly = (req: Request, res: Response, next: NextFunction) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Admin access required' });
+    }
+};
+
+export { protect, adminOnly };
