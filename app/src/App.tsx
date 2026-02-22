@@ -21,10 +21,13 @@ import { CommunityForum } from '@/sections/CommunityForum';
 import { AuthModal } from '@/components/custom/AuthModal';
 import { AlgoBot } from '@/components/custom/AlgoBot';
 import { AdminPanel } from '@/sections/AdminPanel';
+import { ScrollToTop } from '@/components/custom/ScrollToTop';
+import { Documentation } from '@/sections/Documentation';
+import { ApiReference } from '@/sections/ApiReference';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 
-type View = 'home' | 'dashboard' | 'topic' | 'path' | 'problems' | 'notes' | 'leaderboard' | 'community' | 'daily-challenges' | 'admin';
+type View = 'home' | 'dashboard' | 'topic' | 'path' | 'problems' | 'notes' | 'leaderboard' | 'community' | 'daily-challenges' | 'admin' | 'docs' | 'api';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -33,7 +36,6 @@ function AppContent() {
   const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
-  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -82,6 +84,10 @@ function AppContent() {
             window.location.hash = '';
             setCurrentView('home');
           }
+        } else if (hash === 'docs') {
+          setCurrentView('docs');
+        } else if (hash === 'api') {
+          setCurrentView('api');
         } else {
           setCurrentView('home');
         }
@@ -95,20 +101,6 @@ function AppContent() {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [user]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrolledPercent = scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
-      setShowScrollTop(scrolledPercent > 0.5);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   const handleNavigate = (view: View, topicId?: string) => {
     if ((view === 'dashboard' || view === 'notes' || view === 'daily-challenges' || (view === 'topic' && topicId)) && !user) {
@@ -186,6 +178,10 @@ function AppContent() {
         return <CommunityForum onBack={() => handleNavigate('home')} onAuthClick={handleAuthClick} />;
       case 'admin':
         return user?.role === 'admin' ? <AdminPanel /> : null;
+      case 'docs':
+        return <Documentation />;
+      case 'api':
+        return <ApiReference />;
       case 'home':
       default:
         return user ? (
@@ -252,31 +248,7 @@ function AppContent() {
         defaultMode={authMode}
       />
 
-      <AnimatePresence>
-        {showScrollTop && (
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            onClick={scrollToTop}
-            className="fixed bottom-8 right-24 p-3 rounded-full bg-[#a088ff] text-white shadow-lg z-40 hover:bg-[#8f76fa] transition-colors"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 10l7-7m0 0l7 7m-7-7v18"
-              />
-            </svg>
-          </motion.button>
-        )}
-      </AnimatePresence>
+      <ScrollToTop />
 
       <Toaster
         position="top-right"

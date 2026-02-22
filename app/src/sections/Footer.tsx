@@ -10,7 +10,7 @@ import { Logo } from '@/components/ui/Logo';
 
 // Footer component - onNavigate prop reserved for future use
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-type ViewType = 'home' | 'dashboard' | 'topic' | 'problems' | 'notes' | 'leaderboard';
+type ViewType = 'home' | 'dashboard' | 'topic' | 'problems' | 'notes' | 'leaderboard' | 'docs' | 'api';
 
 interface FooterProps {
   onNavigate: (_view: ViewType) => void;
@@ -132,6 +132,10 @@ export function Footer({ onNavigate }: FooterProps) {
                 <li key={link.label}>
                   <a
                     href={link.href}
+                    onClick={(e) => {
+                      if (link.label === 'Documentation') { e.preventDefault(); handleNavClick('docs'); }
+                      else if (link.label === 'API Reference') { e.preventDefault(); handleNavClick('api'); }
+                    }}
                     className="text-sm text-white/60 hover:text-white transition-colors block"
                   >
                     {link.label}
